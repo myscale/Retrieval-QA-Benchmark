@@ -25,6 +25,11 @@ pydantic = "^2.1.1"
 datasets = "^2.14.2"
 tqdm = "^4.65.0"
 loguru = "^0.7.0"
+transformers = "^4.31.0"
+sentence-transformers = "^2.2.2"
+clickhouse-sqlalchemy = "^0.2.4"
+zstd = "^1.5.5.1"
+openai = "^0.27.8"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"

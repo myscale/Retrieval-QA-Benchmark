@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Sequence
+from typing import Any, Callable, Dict, Sequence, Iterable
 
 from pydantic import BaseModel, validator, Extra
 
@@ -6,7 +6,9 @@ from loguru import logger
 from retrieval_qa_benchmark.schema import QARecord
 
 
-def build_value_functions(keys: Sequence[str]):
+def build_value_functions(
+    keys: Iterable[str],
+) -> Dict[str, Callable[[Dict[str, Any]], str]]:
     funcs = {}
     for k in keys:
         func: Callable[[Dict[str, Any]], Any] = lambda x: x[k]
@@ -33,7 +35,9 @@ class BaseTransform(BaseModel):
             )
         return value_functions
 
-    def set_value_function(self, key: str, value: Callable[[Dict[str, Any]], Any]):
+    def set_value_function(
+        self, key: str, value: Callable[[Dict[str, Any]], Any]
+    ) -> None:
         self.value_functions[key] = value
 
     def __call__(self, data: Dict[str, Any]) -> QARecord:
@@ -49,9 +53,9 @@ class BaseTransform(BaseModel):
         return result
 
 
-class MultipleChoiceTransform(BaseTransform):
-    def chain(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        pass
+# class MultipleChoiceTransform(BaseTransform):
+#     def chain(self, data: Dict[str, Any]) -> Dict[str, Any]:
+#         pass
 
 
 class TransformChain(BaseModel):
