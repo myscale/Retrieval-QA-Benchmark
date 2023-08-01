@@ -1,4 +1,5 @@
 from typing import List
+
 from retrieval_qa_benchmark.knowledge.base import BaseKnowledgebase
 from retrieval_qa_benchmark.schema import KnowledgeRecord
 

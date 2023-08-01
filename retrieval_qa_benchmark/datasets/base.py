@@ -3,9 +3,10 @@ from __future__ import annotations
 from typing import Any, List, Sequence, Tuple, Union
 
 from datasets import load_dataset
+from loguru import logger
 from pydantic import BaseModel, Extra
 from tqdm import tqdm
-from loguru import logger
+
 from retrieval_qa_benchmark.schema import QARecord
 from retrieval_qa_benchmark.utils.transforms import BaseTransform, TransformChain
 
@@ -57,8 +58,10 @@ class HFDataset(BaseDataset):
         cls,
         name: Union[str, Sequence[str]],
         eval_split: str = "validation",
-        transform: Union[BaseTransform, TransformChain] = BaseTransform(),
+        transforms: Union[BaseTransform, TransformChain] = BaseTransform(),
         **kwargs: Any,
     ) -> HFDataset:
-        name, eval_set = build_hfdataset_internal(name, eval_split, transform, **kwargs)
+        name, eval_set = build_hfdataset_internal(
+            name, eval_split, transforms, **kwargs
+        )
         return cls(name=name, eval_set=eval_set)

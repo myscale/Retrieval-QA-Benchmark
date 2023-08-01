@@ -1,6 +1,7 @@
-from sqlalchemy import MetaData, Column, Table, types, CheckConstraint
+from sqlalchemy import CheckConstraint, Column, MetaData, Table, types
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import declarative_base
+
 from retrieval_qa_benchmark.schema import BaseKnowledgebase
 
 
@@ -25,6 +26,9 @@ def knowlegde_db_factory(
         )
 
         def __repr__(self) -> str:
-            return f"Knowledge(id={self.id!r}, context={self.context[:20]!r}, title={self.title[:20]!r})"
+            return (
+                f"Knowledge(id={self.id!r}, context={self.context[:20]!r}, "
+                f"title={self.title[:20]!r})"
+            )
 
     return Knowledge

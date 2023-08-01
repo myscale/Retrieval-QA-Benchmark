@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 from typing import List, Optional, Tuple, Any
 from pydantic import BaseModel, Extra
 from retrieval_qa_benchmark.schema import KnowledgeRecord
-from retrieval_qa_benchmark.embeddings.stembedding import BaseEmbedding
+from retrieval_qa_benchmark.experimental.embeddings.stembedding import BaseEmbedding
 
 
 class BaseKnowledgebase(BaseModel):

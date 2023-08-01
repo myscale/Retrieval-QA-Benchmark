@@ -1,11 +1,17 @@
 from __future__ import annotations
+
 from typing import List, Optional
-from sqlalchemy import create_engine, MetaData, Table
+
+from sqlalchemy import MetaData, Table, create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
-from retrieval_qa_benchmark.schema import KnowledgeRecord
-from retrieval_qa_benchmark.schema import BaseDataStore, BaseKnowledgebase
-from retrieval_qa_benchmark.utils.db_helper import knowlegde_db_factory
+
+from retrieval_qa_benchmark.schema import (
+    BaseDataStore,
+    BaseKnowledgebase,
+    KnowledgeRecord,
+)
+from retrieval_qa_benchmark.experimental.datastore.db_helper import knowlegde_db_factory
 
 
 class ClickhouseDatastore(BaseDataStore):
@@ -50,5 +56,6 @@ class ClickhouseDatastore(BaseDataStore):
             session.commit()
 
     def search(self, hint: str, k: int) -> List[KnowledgeRecord]:
-        with self.client.begin() as connection:
-            cursor = connection.execute(text(command))
+        with self.client.begin():
+            # connection.execute(text(command))
+            return []

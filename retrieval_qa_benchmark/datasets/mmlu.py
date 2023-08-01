@@ -1,27 +1,38 @@
 from __future__ import annotations
 
-from typing import Dict, Any
 from hashlib import sha256
+from typing import Any, Dict, Optional, Sequence
+
 from retrieval_qa_benchmark.datasets.base import HFDataset, build_hfdataset_internal
-from retrieval_qa_benchmark.utils.transforms import BaseTransform
+from retrieval_qa_benchmark.utils.transforms import (
+    BaseTransform,
+    MultipleChoiceTransform,
+    TransformChain,
+)
 
 
-def build_id(d: Dict[str, Any], qkey: str = "question", ckey: str = "choices") -> str:
-    return sha256((d[qkey] + "".join(d[ckey])).encode("utf-8")).hexdigest()
+class MMLUTransform(BaseTransform):
+    qkey: str = "question"
+    ckey: str = "choices"
+    akey: str = "answer"
 
+    def transform_id(self, data: Dict[str, Any], **params: Any) -> str:
+        return sha256(
+            (data[self.qkey] + "".join(data[self.ckey])).encode("utf-8")
+        ).hexdigest()
 
-def build_answer(d: Dict[str, Any], akey: str = "answer", ckey: str = "choices") -> str:
-    return f"{chr(65 + d[akey])}. {d[ckey][d[akey]]}"
+    def transform_answer(self, data: Dict[str, Any], **params: Any) -> str:
+        return f"{chr(65 + data[self.akey])}. {data[self.ckey][data[self.akey]]}"
 
+    def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
+        question = data[self.qkey]
+        choices = "\t".join(
+            [f"{chr(65+i)}. {v}" for i, v in enumerate(data[self.ckey])]
+        )
+        return f"{question}\n{choices}"
 
-def build_question(
-    d: Dict[str, Any],
-    qkey: str = "question",
-    ckey: str = "choices",
-) -> str:
-    question = d[qkey]
-    choices = "\t".join([f"{chr(65+i)}. {v}" for i, v in enumerate(d[ckey])])
-    return f"{question}\n{choices}"
+    def transform_type(self, data: Dict[str, Any], **params: Any) -> str:
+        return "MCSA"
 
 
 class MMLU(HFDataset):
@@ -30,12 +41,18 @@ class MMLU(HFDataset):
     """
 
     @classmethod
-    def build(cls, subset: str = "prehistory") -> MMLU:
-        transform = BaseTransform()
-        transform.set_value_function("id", build_id)
-        transform.set_value_function("answer", build_answer)
-        transform.set_value_function("question", build_question)
-        transform.set_value_function("type", lambda x: "MCSA")
+    def build(
+        cls,
+        subset: str = "prehistory",
+        extra_transforms: Optional[Sequence[BaseTransform]] = [
+            MultipleChoiceTransform(
+                prompt_prefix="Please answer with the letter of the correct answer.\n"
+            ),
+        ],
+    ) -> MMLU:
+        transform = MMLUTransform()
+        if extra_transforms:
+            transform = TransformChain(chain=[transform, *extra_transforms])  # type: ignore
         name, eval_set = build_hfdataset_internal(
             name=["cais/mmlu", subset],
             eval_split="test",

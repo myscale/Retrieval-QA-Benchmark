@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+from typing import Optional, Sequence
+
 from retrieval_qa_benchmark.datasets.base import HFDataset, build_hfdataset_internal
-from retrieval_qa_benchmark.utils.transforms import BaseTransform
+from retrieval_qa_benchmark.utils.transforms import (
+    BaseTransform,
+    MultipleChoiceTransform,
+    TransformChain,
+)
 
 
 class HotpotQA(HFDataset):
@@ -10,8 +16,18 @@ class HotpotQA(HFDataset):
     """
 
     @classmethod
-    def build(cls, subset: str = "fullwiki") -> HotpotQA:
+    def build(
+        cls,
+        subset: str = "fullwiki",
+        extra_transforms: Optional[Sequence[BaseTransform]] = [
+            MultipleChoiceTransform(
+                prompt_prefix="Please answer with the letter of the correct answer.\n"
+            ),
+        ],
+    ) -> HotpotQA:
         transform = BaseTransform()
+        if extra_transforms:
+            transform = TransformChain(chain=[transform, *extra_transforms])  # type: ignore
         name, eval_set = build_hfdataset_internal(
             name=["hotpot_qa", subset], eval_split="validation", transform=transform
         )

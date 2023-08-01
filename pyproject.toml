@@ -53,4 +53,4 @@ exclude = []
 [tool.mypy]
 ignore_missing_imports = "True"
 disallow_untyped_defs = "True"
-exclude = []
+exclude = ["retrieval_qa_benchmark/experimental/*"]

@@ -1,4 +1,5 @@
-from typing import Union, List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 from pydantic import BaseModel, Extra, validator
 
@@ -21,7 +22,7 @@ class KnowledgeRecord(BaseModel):
     id: str
     title: Optional[str]
     context: str
-    embedding: Union[np.ndarray, List[float]]
+    embedding: List[float]
     embedding_dim: int
 
     class Config:
@@ -39,7 +40,8 @@ class KnowledgeRecord(BaseModel):
                 np.float32,
                 np.float16,
             ], "Embedding's data type must be one of `float32`, `float16`"
-        assert (
-            len(embedding) == embedding_dim
-        ), f"Embedding's shape should be ({embedding_dim},) but ({len(embedding)},) found."
+        assert len(embedding) == embedding_dim, (
+            f"Embedding's shape should be ({embedding_dim},)"
+            " but ({len(embedding)},) found."
+        )
         return values

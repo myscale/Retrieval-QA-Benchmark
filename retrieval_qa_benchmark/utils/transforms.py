@@ -1,61 +1,61 @@
-from typing import Any, Callable, Dict, Sequence, Iterable
+from __future__ import annotations
 
-from pydantic import BaseModel, validator, Extra
+from typing import Any, Callable, Dict, Iterable, Sequence
 
 from loguru import logger
+from pydantic import BaseModel, Extra
+
 from retrieval_qa_benchmark.schema import QARecord
-
-
-def build_value_functions(
-    keys: Iterable[str],
-) -> Dict[str, Callable[[Dict[str, Any]], str]]:
-    funcs = {}
-    for k in keys:
-        func: Callable[[Dict[str, Any]], Any] = lambda x: x[k]
-        funcs[k] = func
-    return funcs
 
 
 class BaseTransform(BaseModel):
     """Base transformation to elements in datasets"""
 
-    value_functions: Dict[str, Callable[[Dict[str, Any]], str]] = build_value_functions(
-        QARecord.model_fields.keys()
-    )
-
     class Config:
-        extra = Extra.forbid
+        extra = Extra.allow
 
-    @validator("value_functions", always=True)
-    def check_value_functions(cls, value_functions: Dict[str, Any]) -> Any:
-        if len(set(QARecord.model_fields.keys()) - set(value_functions)) != 0:
-            raise KeyError(
-                "Transform got unaligned keys between BaseRow and `value_functions`: "
-                f"{set(QARecord.model_fields.keys())} vs. {set(value_functions.keys())}"
-            )
-        return value_functions
+    @property
+    def targets(self) -> Dict[str, Callable[[Dict[str, Any]], str]]:
+        return {
+            k: getattr(self, f"transform_{k}") for k in QARecord.model_fields.keys()
+        }
 
-    def set_value_function(
-        self, key: str, value: Callable[[Dict[str, Any]], Any]
-    ) -> None:
-        self.value_functions[key] = value
+    def transform_id(self, data: Dict[str, Any], **params: Any) -> str:
+        return str(data["id"])
+
+    def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
+        return str(data["question"])
+
+    def transform_answer(self, data: Dict[str, Any], **params: Any) -> str:
+        return str(data["answer"])
+
+    def transform_type(self, data: Dict[str, Any], **params: Any) -> str:
+        return str(data["type"])
 
     def __call__(self, data: Dict[str, Any]) -> QARecord:
         return QARecord(**{k: str(v) for k, v in self.chain(data).items()})
 
     def chain(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        data_ = data.copy()
         result = {}
-        for k, f in self.value_functions.items():
+        for k, f in self.targets.items():
             try:
-                result[k] = f(data)
+                result[k] = f(data_)
             except Exception as e:
-                raise KeyError(f"Value function failed on key `{k}`")
+                logger.error(f"Transform function failed on key `{k}`")
+                raise e
         return result
 
 
-# class MultipleChoiceTransform(BaseTransform):
-#     def chain(self, data: Dict[str, Any]) -> Dict[str, Any]:
-#         pass
+class MultipleChoiceTransform(BaseTransform):
+    sep_chr: str = "\n"
+    prompt_prefix: str = ""
+    prompt_suffix: str = ""
+
+    def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
+        return self.sep_chr.join(
+            [self.prompt_prefix, data["question"], self.prompt_suffix]
+        )
 
 
 class TransformChain(BaseModel):
@@ -66,4 +66,4 @@ class TransformChain(BaseModel):
     def __call__(self, data: Dict[str, Any]) -> Any:
         for c in self.chain[:-1]:
             data = c.chain(data)
-        return c(data)
+        return self.chain[-1](data)
