@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "retrieval-qa-benchmark"
+version = "0.0.1"
+description = "Benchmark baseline for retrieval qa applications"
+license = "GPL-3.0-only"
+authors = [
+    "Fangrui Liu <fangrui.liu@outlook.com>",
+]
+maintainers = [
+    "Fangrui Liu <fangrui.liu@outlook.com>",
+]
+readme = "README"
+packages = [{include = "retrieval_qa_benchmark"}]
+repository = "https://github.com/myscale/Retrieval-QA-Benchmark"
+keywords = ["LLM", "benchmark"]
+classifiers = [
+    "Topic :: Database :: Database Engines/Servers",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pydantic = "^2.1.1"
+datasets = "^2.14.2"
+tqdm = "^4.65.0"
+loguru = "^0.7.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+black = "^23.7.0"
+ruff = "^0.0.280"
+mypy = "^1.4.1"
+ipykernel = "^6.25.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+select = [
+  "E",  # pycodestyle
+  "F",  # pyflakes
+  "I",  # isort
+]
+exclude = []
+
+[tool.mypy]
+ignore_missing_imports = "True"
+disallow_untyped_defs = "True"
+exclude = []
