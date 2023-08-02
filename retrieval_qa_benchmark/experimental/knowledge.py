@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from typing import List, Optional, Tuple, Any
+from typing import Any, List, Optional, Tuple
+
 from pydantic import BaseModel, Extra
-from retrieval_qa_benchmark.schema import KnowledgeRecord
+
 from retrieval_qa_benchmark.experimental.embeddings.stembedding import BaseEmbedding
+from retrieval_qa_benchmark.schema import KnowledgeRecord
 
 
 class BaseKnowledgebase(BaseModel):
@@ -65,8 +67,8 @@ class KnowledgeTree(BaseModel):
 
     def __call__(self, hint: str, k: int) -> List[KnowledgeRecord]:
         ret = self.levels[0](hint, k)
-        for l in self.levels[1:]:
-            ret = l.chain(ret, k)
+        for l_ in self.levels[1:]:
+            ret = l_.chain(ret, k)
         return ret
 
 

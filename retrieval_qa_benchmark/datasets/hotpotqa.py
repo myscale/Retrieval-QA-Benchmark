@@ -2,14 +2,17 @@ from __future__ import annotations
 
 from typing import Optional, Sequence
 
-from retrieval_qa_benchmark.datasets.base import HFDataset, build_hfdataset_internal
-from retrieval_qa_benchmark.utils.transforms import (
+from retrieval_qa_benchmark.schema import HFDataset
+from retrieval_qa_benchmark.datasets import build_hfdataset_internal
+from retrieval_qa_benchmark.transforms import (
     BaseTransform,
     MultipleChoiceTransform,
     TransformChain,
 )
+from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
+@REGISTRY.register_dataset("hotpot_qa")
 class HotpotQA(HFDataset):
     """https://huggingface.co/datasets/hotpot_qa
     Hotpot QA Dataset from Huggingface
@@ -27,7 +30,9 @@ class HotpotQA(HFDataset):
     ) -> HotpotQA:
         transform = BaseTransform()
         if extra_transforms:
-            transform = TransformChain(chain=[transform, *extra_transforms])  # type: ignore
+            transform = TransformChain(
+                chain=[transform, *extra_transforms]
+            )  # type: ignore
         name, eval_set = build_hfdataset_internal(
             name=["hotpot_qa", subset], eval_split="validation", transform=transform
         )

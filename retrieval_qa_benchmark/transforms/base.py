@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Iterable, Sequence
+from typing import Any, Callable, Dict, Sequence, List, Optional
 
 from loguru import logger
 from pydantic import BaseModel, Extra
 
 from retrieval_qa_benchmark.schema import QARecord
+from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
+@REGISTRY.register_extra_transform("base")
 class BaseTransform(BaseModel):
     """Base transformation to elements in datasets"""
 
@@ -31,6 +33,12 @@ class BaseTransform(BaseModel):
 
     def transform_type(self, data: Dict[str, Any], **params: Any) -> str:
         return str(data["type"])
+    
+    def transform_choices(self, data: Dict[str, Any], **params: Any) -> Optional[List[str]]:
+        try:
+            return data["choices"]
+        except:
+            return None
 
     def __call__(self, data: Dict[str, Any]) -> QARecord:
         return QARecord(**{k: str(v) for k, v in self.chain(data).items()})
@@ -45,17 +53,6 @@ class BaseTransform(BaseModel):
                 logger.error(f"Transform function failed on key `{k}`")
                 raise e
         return result
-
-
-class MultipleChoiceTransform(BaseTransform):
-    sep_chr: str = "\n"
-    prompt_prefix: str = ""
-    prompt_suffix: str = ""
-
-    def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
-        return self.sep_chr.join(
-            [self.prompt_prefix, data["question"], self.prompt_suffix]
-        )
 
 
 class TransformChain(BaseModel):

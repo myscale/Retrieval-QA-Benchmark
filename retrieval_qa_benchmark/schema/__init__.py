@@ -1,13 +1,12 @@
-from retrieval_qa_benchmark.schema.base import KnowledgeRecord, QARecord
-
-# from retrieval_qa_benchmark.schema.embedding import BaseEmbedding
-
-# from retrieval_qa_benchmark.schema.knowledge import BaseKnowledgebase, BaseDataStore
+from retrieval_qa_benchmark.schema.orm import KnowledgeRecord, QARecord, QAPrediction
+from retrieval_qa_benchmark.schema.dataset import BaseDataset, HFDataset, build_hfdataset_internal
+from retrieval_qa_benchmark.schema.model import BaseLLM
 
 __all__ = [
     "QARecord",
+    "QAPrediction",
     "KnowledgeRecord",
-    # "BaseEmbedding",
-    # "BaseKnowledgebase",
-    # "BaseDataStore",
+    "HFDataset",
+    "BaseLLM",
+    "BaseDataset",
 ]

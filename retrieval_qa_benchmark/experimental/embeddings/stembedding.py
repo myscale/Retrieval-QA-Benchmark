@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 import re
-from typing import Any, List
-from pydantic import BaseModel
-from transformers import AutoTokenizer, AutoModel
+from typing import List
+
 from sentence_transformers import SentenceTransformer
+
 from retrieval_qa_benchmark.schema import BaseEmbedding
 
 

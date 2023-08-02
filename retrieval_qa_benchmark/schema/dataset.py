@@ -8,7 +8,8 @@ from pydantic import BaseModel, Extra
 from tqdm import tqdm
 
 from retrieval_qa_benchmark.schema import QARecord
-from retrieval_qa_benchmark.utils.transforms import BaseTransform, TransformChain
+from retrieval_qa_benchmark.transforms import BaseTransform, TransformChain
+from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
 def build_hfdataset_internal(
@@ -58,10 +59,10 @@ class HFDataset(BaseDataset):
         cls,
         name: Union[str, Sequence[str]],
         eval_split: str = "validation",
-        transforms: Union[BaseTransform, TransformChain] = BaseTransform(),
+        extra_transforms: Union[BaseTransform, TransformChain] = BaseTransform(),
         **kwargs: Any,
     ) -> HFDataset:
         name, eval_set = build_hfdataset_internal(
-            name, eval_split, transforms, **kwargs
+            name, eval_split, extra_transforms, **kwargs
         )
         return cls(name=name, eval_set=eval_set)

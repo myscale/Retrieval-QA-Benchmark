@@ -6,8 +6,7 @@ from pydantic import BaseModel
 
 
 class BaseLLM(BaseModel):
-    name: str
-    model: Any
+    model_name: str
 
     @classmethod
     def build(cls, *args: Any, **kwargs: Any) -> BaseLLM:
@@ -16,9 +15,5 @@ class BaseLLM(BaseModel):
     def generate(
         self,
         text: str,
-        system_prompt: str = "You are a helpful assistant.",
-        temperature: float = 0.8,
-        top_p: float = 1.0,
-        **kwargs: Any,
     ) -> str:
         raise NotImplementedError

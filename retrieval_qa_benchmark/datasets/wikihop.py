@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Sequence, Union
+from typing import Any, Dict, Optional, Sequence, List
 
-from retrieval_qa_benchmark.datasets.base import HFDataset, build_hfdataset_internal
-from retrieval_qa_benchmark.utils.transforms import (
+from retrieval_qa_benchmark.schema import HFDataset
+from retrieval_qa_benchmark.datasets import build_hfdataset_internal
+from retrieval_qa_benchmark.transforms import (
     BaseTransform,
     MultipleChoiceTransform,
     TransformChain,
 )
+from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
 class WikiHopTransform(BaseTransform):
@@ -17,6 +19,9 @@ class WikiHopTransform(BaseTransform):
 
     def transform_answer(self, data: Dict[str, Any], **params: Any) -> str:
         return f"{chr(65 + data[self.ckey].index(data[self.akey]))} {data[self.akey]}"
+
+    def transform_choices(self, data: Dict[str, Any], **params: Any) -> Optional[List[str]]:
+        return data[self.ckey]
 
     def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
         question = data[self.qkey]
@@ -29,6 +34,7 @@ class WikiHopTransform(BaseTransform):
         return "MCSA"
 
 
+@REGISTRY.register_dataset("wikihop")
 class WikiHop(HFDataset):
     """https://huggingface.co/datasets/hotpot_qa
     Hotpot QA Dataset from Huggingface
@@ -46,7 +52,9 @@ class WikiHop(HFDataset):
     ) -> WikiHop:
         transform = WikiHopTransform()
         if extra_transforms:
-            transform = TransformChain(chain=[transform, *extra_transforms])  # type: ignore
+            transform = TransformChain(
+                chain=[transform, *extra_transforms]
+            )  # type: ignore
         name, eval_set = build_hfdataset_internal(
             name=["wiki_hop", subset],
             eval_split="validation",

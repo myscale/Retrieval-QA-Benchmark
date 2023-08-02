@@ -1,60 +1,60 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 import openai
 
-from retrieval_qa_benchmark.models.base import BaseLLM
+from retrieval_qa_benchmark.schema import BaseLLM
+from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
+@REGISTRY.register_model("gpt35")
 class GPT(BaseLLM):
+    run_args: Dict[str, Any] = {}
+    system_prompt: str = "You are a helpful assistant."
+
     @classmethod
     def build(
         cls,
         model_name: str = "text-davinci-003",
         api_base: str = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
         api_key: str = os.getenv("OPENAI_API_KEY", ""),
+        system_prompt: Optional[str] = None,
+        run_args: Optional[Dict[str, Any]] = None,
     ) -> GPT:
         openai.api_base = api_base
         openai.api_key = api_key
-        return cls(name=model_name, model=openai)
+        return cls(
+            model_name=model_name,
+            run_args=run_args or {},
+            system_prompt=system_prompt or "",
+        )
 
     def generate(
         self,
         text: str,
-        system_prompt: str = "You are a helpful assistant.",
-        temperature: float = 0.8,
-        top_p: float = 1.0,
-        **kwargs: Any,
     ) -> str:
-        completion = self.model.Completion.create(
+        completion = openai.Completion.create(
             model="gpt-3.5-turbo",
-            prompt="\n".join([system_prompt, text]),
-            temperature=temperature,
-            top_p=top_p,
-            **kwargs,
+            prompt="\n".join([self.system_prompt, text]),
+            **self.run_args,
         )
         return completion.choices[0].text
 
 
+@REGISTRY.register_model("chatgpt35")
 class ChatGPT(GPT):
     def generate(
         self,
-        text: str = "gpt-3.5-turbo",
-        system_prompt: str = "You are a helpful assistant.",
-        temperature: float = 0.8,
-        top_p: float = 1.0,
-        **kwargs: Any,
+        text: str = "",
     ) -> str:
-        completion = self.model.ChatCompletion.create(
-            model=self.name,
+        completion = openai.ChatCompletion.create(
+            model=self.model_name,
             messages=[
-                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": text},
             ],
-            temperature=temperature,
-            top_p=top_p,
-            **kwargs,
+            **self.run_args,
         )
         return completion.choices[0].message.content

@@ -3,12 +3,14 @@ from __future__ import annotations
 from hashlib import sha256
 from typing import Any, Dict, Optional, Sequence
 
-from retrieval_qa_benchmark.datasets.base import HFDataset, build_hfdataset_internal
-from retrieval_qa_benchmark.utils.transforms import (
+from retrieval_qa_benchmark.schema import HFDataset
+from retrieval_qa_benchmark.datasets import build_hfdataset_internal
+from retrieval_qa_benchmark.transforms import (
     BaseTransform,
     MultipleChoiceTransform,
     TransformChain,
 )
+from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
 class MMLUTransform(BaseTransform):
@@ -35,6 +37,7 @@ class MMLUTransform(BaseTransform):
         return "MCSA"
 
 
+@REGISTRY.register_dataset("mmlu")
 class MMLU(HFDataset):
     """https://huggingface.co/datasets/hotpot_qa
     Hotpot QA Dataset from Huggingface
@@ -52,7 +55,9 @@ class MMLU(HFDataset):
     ) -> MMLU:
         transform = MMLUTransform()
         if extra_transforms:
-            transform = TransformChain(chain=[transform, *extra_transforms])  # type: ignore
+            transform = TransformChain(
+                chain=[transform, *extra_transforms]
+            )  # type: ignore
         name, eval_set = build_hfdataset_internal(
             name=["cais/mmlu", subset],
             eval_split="test",

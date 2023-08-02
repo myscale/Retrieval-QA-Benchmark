@@ -11,9 +11,14 @@ class QARecord(BaseModel):
     question: str
     answer: str
     type: str
+    choices: Optional[List[str]] = None
 
     class Config:
         extra = Extra.forbid
+        
+class QAPrediction(QARecord):
+    pred: str
+    matched: bool
 
 
 class KnowledgeRecord(BaseModel):
