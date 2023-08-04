@@ -15,12 +15,11 @@ def mcma_fuzzy_matcher(pred: str, gold: QARecord) -> bool:
         return True
     return False
 
-@REGISTRY.register_evaluator('mcma')
+
+@REGISTRY.register_evaluator("mcma")
 class MCMAEvaluator(BaseEvaluator):
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> MCMAEvaluator:
-        dataset = DatasetFactory.from_config(config["dataset"]).build()
-        transform = TransformChainFactory(
-            chain_config=[TransformFactory.from_config(c) for c in config["transform_chain"]]).build()
-        model = ModelFactory.from_config(config['model']).build()
-        return cls(dataset=dataset, transform=transform, out_file=config['out_file'], llm=model)
+        obj = super().from_config(config)
+        obj.matcher = mcma_fuzzy_matcher
+        return obj

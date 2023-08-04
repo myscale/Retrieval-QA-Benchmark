@@ -32,7 +32,7 @@ class BaseFactory(BaseModel):
 
 class DatasetFactory(BaseFactory):
     def build(self) -> BaseDataset:
-        return REGISTRY.Datasets[self.name](**self.args)
+        return REGISTRY.Datasets[self.name].build(**self.args)
 
 
 class TransformFactory(BaseFactory):
@@ -50,12 +50,4 @@ class TransformChainFactory(BaseModel):
 
 class ModelFactory(BaseFactory):
     def build(self) -> BaseLLM:
-        return REGISTRY.Models[self.name](**self.args, run_args=self.run_args)
-
-
-def assembly_factory(config: Dict[str, Any]) -> :
-    dataset = DatasetFactory.from_config(config["dataset"]).build()
-    transform = TransformChainFactory(
-        chain_config=[TransformFactory.from_config(c) for c in config["transform_chain"]]).build()
-    model = ModelFactory.from_config(config['model']).build()
-    return 
+        return REGISTRY.Models[self.name].build(**self.args, run_args=self.run_args)

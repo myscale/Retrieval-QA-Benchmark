@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, Optional, Sequence, List
 
 from retrieval_qa_benchmark.schema import HFDataset
-from retrieval_qa_benchmark.datasets import build_hfdataset_internal
+from retrieval_qa_benchmark.datasets.helper import build_hfdataset_internal
 from retrieval_qa_benchmark.transforms import (
     BaseTransform,
     MultipleChoiceTransform,
@@ -18,9 +18,11 @@ class WikiHopTransform(BaseTransform):
     akey: str = "answer"
 
     def transform_answer(self, data: Dict[str, Any], **params: Any) -> str:
-        return f"{chr(65 + data[self.ckey].index(data[self.akey]))} {data[self.akey]}"
+        return data[self.akey]
 
-    def transform_choices(self, data: Dict[str, Any], **params: Any) -> Optional[List[str]]:
+    def transform_choices(
+        self, data: Dict[str, Any], **params: Any
+    ) -> Optional[List[str]]:
         return data[self.ckey]
 
     def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
@@ -28,10 +30,15 @@ class WikiHopTransform(BaseTransform):
         choices = "\t".join(
             [f"{chr(65+i)}. {v}." for i, v in enumerate(data[self.ckey])]
         )
-        return f"{question}\n{choices}"
+        return f"Question: {question}\nChoices: {choices}"
 
     def transform_type(self, data: Dict[str, Any], **params: Any) -> str:
         return "MCSA"
+
+    def transform_choices(
+        self, data: Dict[str, Any], **params: Any
+    ) -> Optional[List[str]]:
+        return data["candidates"]
 
 
 @REGISTRY.register_dataset("wikihop")

@@ -6,16 +6,23 @@ evaluator:
     - name: mcsa_prompt
       args:
         sep_chr: "\n"
+        prompt_prefix: "The following are multiple choice questions (with answers)\n"
+        prompt_suffix: "Answer: "
+    - name: mcsa_fewshot_mmlu
+      args:
+        example_csv: "data/dev/prehistory_dev.csv"
+        
   model:
-    name: "chatgpt35"
+    name: "gpt35"
     args:
       model_name: "gpt-3.5-turbo"
-      api_base: "https://10.1.3.28:8990/v1"
+      api_base: "http://10.1.3.28:8990/v1"
       api_key: "sk-some-super-secret-key-you-will-never-know"
       system_prompt: "You are a helpful assistant."
     run_args:
       temperature: 0.0
       top_p: 1.0
+      max_tokens: 30
 
 
   

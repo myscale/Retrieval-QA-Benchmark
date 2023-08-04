@@ -13,14 +13,15 @@ def mcsa_fuzzy_matcher(pred: str, gold: QARecord) -> bool:
         return True
     if f"{chr(65 + gold.choices.index(gold.answer))}." in pred:
         return True
+    if pred[0] == f"{chr(65 + gold.choices.index(gold.answer))}":
+        return true
     return False
 
-@REGISTRY.register_evaluator('mcsa')
+
+@REGISTRY.register_evaluator("mcsa")
 class MCSAEvaluator(BaseEvaluator):
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> MCSAEvaluator:
-        dataset = DatasetFactory.from_config(config["dataset"]).build()
-        transform = TransformChainFactory(
-            chain_config=[TransformFactory.from_config(c) for c in config["transform_chain"]]).build()
-        model = ModelFactory.from_config(config['model']).build()
-        return cls(dataset=dataset, transform=transform, matcher=mcsa_fuzzy_matcher, out_file=config['out_file'], llm=model)
+        obj = super().from_config(config)
+        obj.matcher = mcsa_fuzzy_matcher
+        return obj

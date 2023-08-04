@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 import numpy as np
 from pydantic import BaseModel, Extra, validator
@@ -11,11 +11,12 @@ class QARecord(BaseModel):
     question: str
     answer: str
     type: str
-    choices: Optional[List[str]] = None
+    choices: Optional[Sequence[str]] = None
 
     class Config:
         extra = Extra.forbid
-        
+
+
 class QAPrediction(QARecord):
     pred: str
     matched: bool

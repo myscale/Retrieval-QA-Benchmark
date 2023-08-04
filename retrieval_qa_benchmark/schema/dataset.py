@@ -46,7 +46,7 @@ class BaseDataset(BaseModel):
 
     def __getitem__(self, index: int) -> QARecord:
         return self.eval_set[index]
-
+    
     def __len__(self) -> int:
         return len(self.eval_set)
 

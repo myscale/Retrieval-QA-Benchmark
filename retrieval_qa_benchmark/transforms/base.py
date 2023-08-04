@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Sequence, List, Optional
+from typing import Any, Callable, Dict, Sequence, List, Optional, Union
 
 from loguru import logger
 from pydantic import BaseModel, Extra
@@ -33,22 +33,27 @@ class BaseTransform(BaseModel):
 
     def transform_type(self, data: Dict[str, Any], **params: Any) -> str:
         return str(data["type"])
-    
-    def transform_choices(self, data: Dict[str, Any], **params: Any) -> Optional[List[str]]:
+
+    def transform_choices(
+        self, data: Dict[str, Any], **params: Any
+    ) -> Optional[List[str]]:
         try:
             return data["choices"]
         except:
             return None
 
     def __call__(self, data: Dict[str, Any]) -> QARecord:
-        return QARecord(**{k: str(v) for k, v in self.chain(data).items()})
+        return QARecord(
+            **{k: v for k, v in self.chain(data).items() if v is not None}
+        )
 
-    def chain(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        data_ = data.copy()
+    def chain(self, data: Union[QARecord, Dict[str, Any]]) -> Dict[str, Any]:
         result = {}
+        if type(data) is QARecord:
+            data = data.model_dump()
         for k, f in self.targets.items():
             try:
-                result[k] = f(data_)
+                result[k] = f(data)
             except Exception as e:
                 logger.error(f"Transform function failed on key `{k}`")
                 raise e

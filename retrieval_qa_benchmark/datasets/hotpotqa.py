@@ -1,15 +1,27 @@
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 from retrieval_qa_benchmark.schema import HFDataset
-from retrieval_qa_benchmark.datasets import build_hfdataset_internal
+from retrieval_qa_benchmark.datasets.helper import build_hfdataset_internal
 from retrieval_qa_benchmark.transforms import (
     BaseTransform,
     MultipleChoiceTransform,
     TransformChain,
 )
 from retrieval_qa_benchmark.utils.registry import REGISTRY
+
+
+class HotpotQATransform(BaseTransform):
+    def transform_choices(
+        self, data: Dict[str, Any], **params: Any
+    ) -> Optional[List[str]]:
+        return None
+    
+    def transform_question(
+        self, data: Dict[str, Any], **params: Any
+    ) -> Optional[List[str]]:
+        return f"Question: {data['question']}\n"
 
 
 @REGISTRY.register_dataset("hotpot_qa")
@@ -28,7 +40,7 @@ class HotpotQA(HFDataset):
             ),
         ],
     ) -> HotpotQA:
-        transform = BaseTransform()
+        transform = HotpotQATransform()
         if extra_transforms:
             transform = TransformChain(
                 chain=[transform, *extra_transforms]
