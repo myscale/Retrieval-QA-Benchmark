@@ -47,10 +47,14 @@ class BaseEvaluator(BaseModel):
             try:
                 d_ = self.transform(d)
                 pred = self.llm.generate(d_.question)
-                mtch = self.matcher(pred, d_)
+                mtch = self.matcher(pred.generated, d_)
                 if mtch:
                     cnt += 1
-                result.append(QAPrediction(**d_.model_dump(), pred=pred, matched=mtch))
+                result.append(QAPrediction(**d_.model_dump(), 
+                                           pred=pred.generated, 
+                                           matched=mtch,
+                                           prompt_tokens=pred.prompt_tokens,
+                                           completion_tokens=pred.completion_tokens))
             except Exception as e:
                 logger.error(f"Failed to evaluate record {str(d)}")
                 raise e

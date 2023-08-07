@@ -7,6 +7,7 @@ from pydantic import BaseModel, Extra
 
 from retrieval_qa_benchmark.schema.datatypes import QARecord
 from retrieval_qa_benchmark.utils.registry import REGISTRY
+from retrieval_qa_benchmark.utils.profiler import PROFILER
 
 def get_func(obj: BaseTransform, name:str) -> Callable:
     method_name = f"transform_{name}"
@@ -46,6 +47,7 @@ class BaseTransform(BaseModel):
             **{k: v for k, v in self.chain(data).items() if v is not None}
         )
 
+    @PROFILER.profile_function("BaseTransform.chain")
     def chain(self, data: Union[QARecord, Dict[str, Any]]) -> Dict[str, Any]:
         result = {}
         if type(data) is QARecord:
@@ -64,6 +66,7 @@ class TransformChain(BaseModel):
 
     chain: Sequence[BaseTransform]
 
+    @PROFILER.profile_function("TransformChain.__call__")
     def __call__(self, data: Dict[str, Any]) -> Any:
         for c in self.chain[:-1]:
             data = c.chain(data)

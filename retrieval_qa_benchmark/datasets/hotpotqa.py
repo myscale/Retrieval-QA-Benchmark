@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Sequence
 
-from retrieval_qa_benchmark.schema import HFDataset
+from retrieval_qa_benchmark.schema import BaseDataset
 from retrieval_qa_benchmark.datasets.helper import build_hfdataset_internal
 from retrieval_qa_benchmark.schema import BaseTransform
 from retrieval_qa_benchmark.utils.registry import REGISTRY
@@ -21,7 +21,7 @@ class HotpotQATransform(BaseTransform):
 
 
 @REGISTRY.register_dataset("hotpot_qa")
-class HotpotQA(HFDataset):
+class HotpotQA(BaseDataset):
     """https://huggingface.co/datasets/hotpot_qa
     Hotpot QA Dataset from Huggingface
     """
