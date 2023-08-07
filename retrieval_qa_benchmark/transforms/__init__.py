@@ -1,6 +1,4 @@
-from retrieval_qa_benchmark.transforms.base import BaseTransform, TransformChain
 from retrieval_qa_benchmark.transforms.mcsa_prompt import MultipleChoiceTransform, FewshotMultipleChoiceTransform
-from retrieval_qa_benchmark.transforms.mcma_prompt import MultipleChoiceTransform
+from retrieval_qa_benchmark.transforms.mcma_prompt import MultipleChoiceMultipleAnswerTransform
 
-__all__ = ["BaseTransform", "TransformChain", "MultipleChoiceTransform", "FewshotMultipleChoiceTransform",
-           "MultipleChoiceTransform"]
+__all__ = ["MultipleChoiceMultipleAnswerTransform", "FewshotMultipleChoiceTransform", "MultipleChoiceTransform"]

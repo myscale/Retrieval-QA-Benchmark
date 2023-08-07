@@ -1,38 +1,37 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Sequence, List, Optional, Union
+from typing import Any, Callable, Dict, Sequence, List, Optional, Union, cast
 
 from loguru import logger
 from pydantic import BaseModel, Extra
 
-from retrieval_qa_benchmark.schema import QARecord
+from retrieval_qa_benchmark.schema.datatypes import QARecord
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
+def get_func(obj: BaseTransform, name:str) -> Callable:
+    method_name = f"transform_{name}"
+    try:
+        return getattr(obj, method_name)
+    except AttributeError:
+        def default_func(data):
+            if name in data:
+                return str(data[name])
+            else:
+                return ''
+        return default_func
 
-@REGISTRY.register_extra_transform("base")
+
+@REGISTRY.register_transform("base")
 class BaseTransform(BaseModel):
     """Base transformation to elements in datasets"""
 
     class Config:
         extra = Extra.allow
 
-    @property
     def targets(self) -> Dict[str, Callable[[Dict[str, Any]], str]]:
         return {
-            k: getattr(self, f"transform_{k}") for k in QARecord.model_fields.keys()
+            k: get_func(self, k) for k in QARecord.model_fields.keys()
         }
-
-    def transform_id(self, data: Dict[str, Any], **params: Any) -> str:
-        return str(data["id"])
-
-    def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
-        return str(data["question"])
-
-    def transform_answer(self, data: Dict[str, Any], **params: Any) -> str:
-        return str(data["answer"])
-
-    def transform_type(self, data: Dict[str, Any], **params: Any) -> str:
-        return str(data["type"])
 
     def transform_choices(
         self, data: Dict[str, Any], **params: Any
@@ -51,9 +50,9 @@ class BaseTransform(BaseModel):
         result = {}
         if type(data) is QARecord:
             data = data.model_dump()
-        for k, f in self.targets.items():
+        for k, f in self.targets().items():
             try:
-                result[k] = f(data)
+                result[k] = f(cast(Dict[str, Any], data))
             except Exception as e:
                 logger.error(f"Transform function failed on key `{k}`")
                 raise e

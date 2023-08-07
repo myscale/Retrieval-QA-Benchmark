@@ -7,9 +7,8 @@ from loguru import logger
 from pydantic import BaseModel, Extra
 from tqdm import tqdm
 
-from retrieval_qa_benchmark.schema import QARecord
-from retrieval_qa_benchmark.transforms import BaseTransform, TransformChain
-from retrieval_qa_benchmark.utils.registry import REGISTRY
+from retrieval_qa_benchmark.schema.datatypes import QARecord
+from retrieval_qa_benchmark.schema.transform import BaseTransform, TransformChain
 
 
 def build_hfdataset_internal(

@@ -1,10 +1,12 @@
-from retrieval_qa_benchmark.schema.orm import KnowledgeRecord, QARecord, QAPrediction
+from retrieval_qa_benchmark.schema.datatypes import KnowledgeRecord, QAPrediction, QARecord
+from retrieval_qa_benchmark.schema.transform import BaseTransform, TransformChain
 from retrieval_qa_benchmark.schema.dataset import (
     BaseDataset,
     HFDataset,
     build_hfdataset_internal,
 )
 from retrieval_qa_benchmark.schema.model import BaseLLM
+
 
 __all__ = [
     "QARecord",
@@ -13,4 +15,6 @@ __all__ = [
     "HFDataset",
     "BaseLLM",
     "BaseDataset",
+    "BaseTransform",
+    "TransformChain"
 ]

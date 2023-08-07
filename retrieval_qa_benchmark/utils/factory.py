@@ -6,7 +6,7 @@ from pydantic import BaseModel, Extra
 
 from retrieval_qa_benchmark.schema import BaseDataset
 from retrieval_qa_benchmark.schema import BaseLLM
-from retrieval_qa_benchmark.transforms import BaseTransform, TransformChain
+from retrieval_qa_benchmark.schema import BaseTransform, TransformChain
 
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
