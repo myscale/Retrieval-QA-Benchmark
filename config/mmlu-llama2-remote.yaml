@@ -20,6 +20,7 @@ evaluator:
       temperature: 0.0
       top_p: 1.0
       max_tokens: 30
+      stop: "\n\n"
 
 
   
