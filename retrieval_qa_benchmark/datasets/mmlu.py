@@ -4,13 +4,9 @@ from hashlib import sha256
 from typing import Any, Dict, Optional, Sequence, List
 
 from ast import literal_eval
-from retrieval_qa_benchmark.schema import HFDataset
+from retrieval_qa_benchmark.schema import BaseDataset
 from retrieval_qa_benchmark.datasets.helper import build_hfdataset_internal
-from retrieval_qa_benchmark.transforms import (
-    BaseTransform,
-    MultipleChoiceTransform,
-    TransformChain,
-)
+from retrieval_qa_benchmark.schema import BaseTransform
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
@@ -29,10 +25,10 @@ class MMLUTransform(BaseTransform):
 
     def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
         question = data[self.qkey]
-        choices = "\t".join(
+        choices = "\n".join(
             [f"{chr(65+i)}. {v}" for i, v in enumerate(data[self.ckey])]
         )
-        return f"Question: {question}\nChoices: {choices}"
+        return f"{question}\n{choices}"
 
     def transform_type(self, data: Dict[str, Any], **params: Any) -> str:
         return "MCSA"
@@ -44,7 +40,7 @@ class MMLUTransform(BaseTransform):
 
 
 @REGISTRY.register_dataset("mmlu")
-class MMLU(HFDataset):
+class MMLU(BaseDataset):
     """https://huggingface.co/datasets/hotpot_qa
     Hotpot QA Dataset from Huggingface
     """
@@ -53,17 +49,8 @@ class MMLU(HFDataset):
     def build(
         cls,
         subset: str = "prehistory",
-        extra_transforms: Optional[Sequence[BaseTransform]] = [
-            MultipleChoiceTransform(
-                prompt_prefix="Please answer with the letter of the correct answer.\n"
-            ),
-        ],
     ) -> MMLU:
         transform = MMLUTransform()
-        if extra_transforms:
-            transform = TransformChain(
-                chain=[transform, *extra_transforms]
-            )  # type: ignore
         name, eval_set = build_hfdataset_internal(
             name=["cais/mmlu", subset],
             eval_split="test",

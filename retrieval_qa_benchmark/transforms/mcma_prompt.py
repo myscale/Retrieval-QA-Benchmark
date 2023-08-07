@@ -1,11 +1,11 @@
 from typing import Any, Dict, Optional, List
 
-from retrieval_qa_benchmark.transforms import BaseTransform
+from retrieval_qa_benchmark.schema import BaseTransform
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
-@REGISTRY.register_extra_transform("mcsa_prompt")
-class MultipleChoiceTransform(BaseTransform):
+@REGISTRY.register_transform("mcma_prompt")
+class MultipleChoiceMultipleAnswerTransform(BaseTransform):
     sep_chr: str = "\n"
     prompt_prefix: str = (
         "Please answer with the letter of the correct answer. "

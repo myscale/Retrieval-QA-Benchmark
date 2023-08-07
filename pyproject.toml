@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 pydantic = "^2.1.1"
 datasets = "^2.14.2"
 tqdm = "^4.65.0"
@@ -30,6 +30,12 @@ sentence-transformers = "^2.2.2"
 zstd = "^1.5.5.1"
 openai = "^0.27.8"
 black = {extras = ["jupyter"], version = "^23.7.0"}
+numpy = "^1.25.2"
+faiss-gpu = {version = "^1.7.2", platform = "linux"}
+faiss-cpu = {version = "^1.7.4", platform = "darwin"}
+torch = "^2.0.1"
+nltk = "^3.8.1"
+rank-bm25 = "^0.2.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"

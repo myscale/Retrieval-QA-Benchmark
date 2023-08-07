@@ -2,7 +2,7 @@ from typing import Union, Sequence, Tuple, Any, List
 from datasets import load_dataset
 from tqdm import tqdm
 from loguru import logger
-from retrieval_qa_benchmark.transforms.base import BaseTransform, TransformChain
+from retrieval_qa_benchmark.schema.transform import BaseTransform, TransformChain
 from retrieval_qa_benchmark.schema import QARecord
 
 

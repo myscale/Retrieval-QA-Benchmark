@@ -1,20 +1,6 @@
-"""
-Fangrui Liu @ MOQI.AI
-
-Copyright Reserved 2021
-NO DISTRIBUTION AGREEMENT PROVIDED
-"""
-
 from typing import Any, Callable, Dict
 
 from pydantic import BaseModel, Extra
-
-# REGISTRY: Dict[str, Dict[str, Callable]] = {
-#     "DATASET": {},
-#     "EXTRA_TRANSFORM": {},
-#     "MODEL": {},
-#     "EVALUATOR": {},
-# }
 
 
 class Registry(BaseModel):
@@ -47,7 +33,7 @@ class Registry(BaseModel):
 
         return decorator
 
-    def register_extra_transform(self, name: str) -> Callable:
+    def register_transform(self, name: str) -> Callable:
         def decorator(f: Callable) -> Callable:
             self.Transforms[name] = f
             return f

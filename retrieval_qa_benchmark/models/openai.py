@@ -5,14 +5,50 @@ from typing import Any, Dict, Optional
 
 import openai
 
-from retrieval_qa_benchmark.schema import BaseLLM
+from retrieval_qa_benchmark.schema import BaseLLM, BaseLLMOutput
 from retrieval_qa_benchmark.utils.registry import REGISTRY
+from retrieval_qa_benchmark.utils.profiler import PROFILER
+
+@REGISTRY.register_model("remote-llm")
+class RemoteLLM(BaseLLM):
+    run_args: Dict[str, Any] = {}
+    system_prompt: str = "You are a helpful assistant."
+
+    @classmethod
+    def build(
+        cls,
+        model_name: str = "llama2-13b-chat",
+        api_base: str = os.getenv("OPENAI_API_BASE", "http://10.1.3.28:8990/v1"),
+        api_key: str = os.getenv("OPENAI_API_KEY", "sk-some-super-secret-key-you-will-never-know"),
+        system_prompt: Optional[str] = None,
+        run_args: Optional[Dict[str, Any]] = None,
+    ) -> GPT:
+        openai.api_base = api_base
+        openai.api_key = api_key
+        return cls(
+            model_name=model_name,
+            run_args=run_args or {},
+            system_prompt=system_prompt or "",
+        )
+
+    def _generate(
+        self,
+        text: str,
+    ) -> BaseLLMOutput:
+        completion = openai.Completion.create(
+            model=self.model_name,
+            prompt="\n".join([self.system_prompt, text]),
+            **self.run_args,
+        )
+
+        return BaseLLMOutput(generated=completion.choices[0].text,
+                             prompt_tokens=completion.usage.prompt_tokens,
+                             completion_tokens=completion.usage.completion_tokens)
+
 
 
 @REGISTRY.register_model("gpt35")
-class GPT(BaseLLM):
-    run_args: Dict[str, Any] = {}
-    system_prompt: str = "You are a helpful assistant."
+class GPT(RemoteLLM):
 
     @classmethod
     def build(
@@ -31,24 +67,13 @@ class GPT(BaseLLM):
             system_prompt=system_prompt or "",
         )
 
-    def generate(
-        self,
-        text: str,
-    ) -> str:
-        completion = openai.Completion.create(
-            model="gpt-3.5-turbo",
-            prompt="\n".join([self.system_prompt, text]),
-            **self.run_args,
-        )
-        return completion.choices[0].text
-
 
 @REGISTRY.register_model("chatgpt35")
 class ChatGPT(GPT):
-    def generate(
+    def _generate(
         self,
         text: str = "",
-    ) -> str:
+    ) -> BaseLLMOutput:
         completion = openai.ChatCompletion.create(
             model=self.model_name,
             messages=[
@@ -57,4 +82,6 @@ class ChatGPT(GPT):
             ],
             **self.run_args,
         )
-        return completion.choices[0].message.content
+        return BaseLLMOutput(generated=completion.choices[0].message.content,
+                            prompt_tokens=completion.usage.prompt_tokens,
+                            completion_tokens=completion.usage.completion_tokens)

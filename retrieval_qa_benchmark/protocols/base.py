@@ -5,9 +5,7 @@ from pydantic import BaseModel, Extra
 
 from loguru import logger
 from tqdm import tqdm
-from retrieval_qa_benchmark.transforms.base import BaseTransform, TransformChain
-from retrieval_qa_benchmark.schema import BaseDataset
-from retrieval_qa_benchmark.schema import BaseLLM
+from retrieval_qa_benchmark.schema import BaseTransform, TransformChain, BaseDataset, BaseLLM
 from retrieval_qa_benchmark.utils.factory import (
     ModelFactory,
     TransformFactory,
@@ -35,7 +33,7 @@ class BaseEvaluator(BaseModel):
         dataset = DatasetFactory.from_config(config["dataset"]).build()
         transform = TransformChainFactory(
             chain_config=[
-                TransformFactory.from_config(c) for c in config["transform_chain"]
+                TransformFactory.from_config(c) for c in config["transform_chain"] # type: ignore
             ]
         ).build()
         model = ModelFactory.from_config(config["model"]).build()
@@ -49,10 +47,14 @@ class BaseEvaluator(BaseModel):
             try:
                 d_ = self.transform(d)
                 pred = self.llm.generate(d_.question)
-                mtch = self.matcher(pred, d_)
+                mtch = self.matcher(pred.generated, d_)
                 if mtch:
                     cnt += 1
-                result.append(QAPrediction(**d.model_dump(), pred=pred, matched=mtch))
+                result.append(QAPrediction(**d_.model_dump(), 
+                                           pred=pred.generated, 
+                                           matched=mtch,
+                                           prompt_tokens=pred.prompt_tokens,
+                                           completion_tokens=pred.completion_tokens))
             except Exception as e:
                 logger.error(f"Failed to evaluate record {str(d)}")
                 raise e

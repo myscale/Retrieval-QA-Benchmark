@@ -1,3 +1,3 @@
-from retrieval_qa_benchmark.models.openai import GPT, ChatGPT
+from retrieval_qa_benchmark.models.openai import GPT, ChatGPT, RemoteLLM
 
-__all__ = ["GPT", "ChatGPT"]
+__all__ = ["GPT", "ChatGPT", "RemoteLLM"]
