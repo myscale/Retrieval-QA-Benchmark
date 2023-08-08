@@ -1,24 +1,27 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Sequence, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union, cast
 
 from loguru import logger
 from pydantic import BaseModel, Extra
 
 from retrieval_qa_benchmark.schema.datatypes import QARecord
-from retrieval_qa_benchmark.utils.registry import REGISTRY
 from retrieval_qa_benchmark.utils.profiler import PROFILER
+from retrieval_qa_benchmark.utils.registry import REGISTRY
 
-def get_func(obj: BaseTransform, name:str) -> Callable:
+
+def get_func(obj: BaseTransform, name: str) -> Callable:
     method_name = f"transform_{name}"
     try:
         return getattr(obj, method_name)
     except AttributeError:
-        def default_func(data):
+
+        def default_func(data: Dict[str, Any]) -> str:
             if name in data:
                 return str(data[name])
             else:
-                return ''
+                return ""
+
         return default_func
 
 
@@ -30,22 +33,24 @@ class BaseTransform(BaseModel):
         extra = Extra.allow
 
     def targets(self) -> Dict[str, Callable[[Dict[str, Any]], str]]:
-        return {
-            k: get_func(self, k) for k in QARecord.model_fields.keys()
-        }
+        return {k: get_func(self, k) for k in QARecord.model_fields.keys()}
 
     def transform_choices(
         self, data: Dict[str, Any], **params: Any
     ) -> Optional[List[str]]:
         try:
             return data["choices"]
-        except:
+        except KeyError:
             return None
 
+    def transform_raw_question(self, data: Dict[str, Any], **params: Any) -> str:
+        try:
+            return data["raw_question"]
+        except KeyError:
+            return data["question"]
+
     def __call__(self, data: Dict[str, Any]) -> QARecord:
-        return QARecord(
-            **{k: v for k, v in self.chain(data).items() if v is not None}
-        )
+        return QARecord(**{k: v for k, v in self.chain(data).items() if v is not None})
 
     @PROFILER.profile_function("BaseTransform.chain")
     def chain(self, data: Union[QARecord, Dict[str, Any]]) -> Dict[str, Any]:

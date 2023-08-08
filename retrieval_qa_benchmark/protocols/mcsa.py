@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from typing import cast, Dict
+from typing import Any, Dict, cast
 
-from retrieval_qa_benchmark.utils.factory import *
-from retrieval_qa_benchmark.schema import QARecord
 from retrieval_qa_benchmark.protocols.base import BaseEvaluator
+from retrieval_qa_benchmark.schema import QARecord
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
 def mcsa_fuzzy_matcher(pred: str, gold: QARecord) -> bool:
-    pred = pred.split('\n\n')[0]
+    pred = pred.split("\n\n")[0]
     if gold.answer in pred:
         return True
     if gold.choices is not None:

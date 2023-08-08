@@ -1,18 +1,25 @@
 from __future__ import annotations
 
-from typing import Union, Callable, Optional, Tuple, List, Dict, Any
-from pydantic import BaseModel, Extra
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from loguru import logger
+from pydantic import BaseModel, Extra
 from tqdm import tqdm
-from retrieval_qa_benchmark.schema import BaseTransform, TransformChain, BaseDataset, BaseLLM
-from retrieval_qa_benchmark.utils.factory import (
-    ModelFactory,
-    TransformFactory,
-    TransformChainFactory,
-    DatasetFactory,
+
+from retrieval_qa_benchmark.schema import (
+    BaseDataset,
+    BaseLLM,
+    BaseTransform,
+    QAPrediction,
+    QARecord,
+    TransformChain,
 )
-from retrieval_qa_benchmark.schema import QAPrediction, QARecord
+from retrieval_qa_benchmark.utils.factory import (
+    DatasetFactory,
+    ModelFactory,
+    TransformChainFactory,
+    TransformFactory,
+)
 
 
 class BaseEvaluator(BaseModel):
@@ -21,7 +28,7 @@ class BaseEvaluator(BaseModel):
     dataset: BaseDataset
     llm: BaseLLM
     transform: Union[BaseTransform, TransformChain]
-    matcher: Callable[[str, QARecord], bool] = lambda x, y: x == y.answer
+    matcher: Callable[[str, QARecord], bool] = lambda x, y: x == y.answer  # noqa: E731
     out_file: Optional[str] = None
 
     class Config:
@@ -33,7 +40,8 @@ class BaseEvaluator(BaseModel):
         dataset = DatasetFactory.from_config(config["dataset"]).build()
         transform = TransformChainFactory(
             chain_config=[
-                TransformFactory.from_config(c) for c in config["transform_chain"] # type: ignore
+                TransformFactory.from_config(c)  # type: ignore
+                for c in config["transform_chain"]
             ]
         ).build()
         model = ModelFactory.from_config(config["model"]).build()
@@ -50,11 +58,15 @@ class BaseEvaluator(BaseModel):
                 mtch = self.matcher(pred.generated, d_)
                 if mtch:
                     cnt += 1
-                result.append(QAPrediction(**d_.model_dump(), 
-                                           pred=pred.generated, 
-                                           matched=mtch,
-                                           prompt_tokens=pred.prompt_tokens,
-                                           completion_tokens=pred.completion_tokens))
+                result.append(
+                    QAPrediction(
+                        **d_.model_dump(),
+                        pred=pred.generated,
+                        matched=mtch,
+                        prompt_tokens=pred.prompt_tokens,
+                        completion_tokens=pred.completion_tokens,
+                    )
+                )
             except Exception as e:
                 logger.error(f"Failed to evaluate record {str(d)}")
                 raise e

@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import Any, List
 
-from datasets import load_dataset
 from pydantic import BaseModel, Extra
 
 from retrieval_qa_benchmark.schema.datatypes import QARecord
 from retrieval_qa_benchmark.utils.profiler import PROFILER
 
 # profiler: Optional[List[BaseProfiler]] = None
+
 
 class BaseDataset(BaseModel):
     """Base class dataset"""
@@ -26,6 +26,6 @@ class BaseDataset(BaseModel):
     @PROFILER.profile_function("BaseDataset.__getitem__")
     def __getitem__(self, index: int) -> QARecord:
         return self.eval_set[index]
-    
+
     def __len__(self) -> int:
         return len(self.eval_set)

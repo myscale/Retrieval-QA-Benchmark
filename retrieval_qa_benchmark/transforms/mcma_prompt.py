@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 
 from retrieval_qa_benchmark.schema import BaseTransform
 from retrieval_qa_benchmark.utils.registry import REGISTRY
@@ -18,5 +18,7 @@ class MultipleChoiceMultipleAnswerTransform(BaseTransform):
             [self.prompt_prefix, f"{data['question']}", self.prompt_suffix]
         )
 
-    def transform_choices(self, data: Dict[str, Any], **params: Any) -> Optional[List[str]]:
-        return data['choices']
+    def transform_choices(
+        self, data: Dict[str, Any], **params: Any
+    ) -> Optional[List[str]]:
+        return data["choices"]

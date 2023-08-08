@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Optional, Sequence
 
 import numpy as np
 from pydantic import BaseModel, Extra, validator
-import tiktoken
 
 
 class QARecord(BaseModel):
@@ -12,15 +11,15 @@ class QARecord(BaseModel):
     question: str
     answer: str
     type: str
+    raw_question: str
     choices: Optional[Sequence[str]] = None
 
     class Config:
         extra = Extra.forbid
 
 
-
 class QAPrediction(QARecord):
-    prompt_tokens: int 
+    prompt_tokens: int
     completion_tokens: int
     pred: str
     matched: bool

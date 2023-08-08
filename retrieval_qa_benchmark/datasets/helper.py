@@ -1,9 +1,11 @@
-from typing import Union, Sequence, Tuple, Any, List
+from typing import Any, List, Sequence, Tuple, Union
+
 from datasets import load_dataset
-from tqdm import tqdm
 from loguru import logger
-from retrieval_qa_benchmark.schema.transform import BaseTransform, TransformChain
+from tqdm import tqdm
+
 from retrieval_qa_benchmark.schema import QARecord
+from retrieval_qa_benchmark.schema.transform import BaseTransform, TransformChain
 
 
 def build_hfdataset_internal(

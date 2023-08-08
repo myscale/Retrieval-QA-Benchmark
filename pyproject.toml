@@ -31,11 +31,10 @@ zstd = "^1.5.5.1"
 openai = "^0.27.8"
 black = {extras = ["jupyter"], version = "^23.7.0"}
 numpy = "^1.25.2"
-faiss-gpu = {version = "^1.7.2", platform = "linux"}
-faiss-cpu = {version = "^1.7.4", platform = "darwin"}
-torch = "^2.0.1"
+faiss-cpu = {version = "1.7.3", platform = "darwin"}
 nltk = "^3.8.1"
 rank-bm25 = "^0.2.2"
+torch = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
@@ -54,9 +53,10 @@ select = [
   "F",  # pyflakes
   "I",  # isort
 ]
-exclude = []
+exclude = ["F403"]
 
 [tool.mypy]
 ignore_missing_imports = "True"
 disallow_untyped_defs = "True"
-exclude = ["retrieval_qa_benchmark/experimental/*"]
+exclude = ["retrieval_qa_benchmark/experimental/*", "retrieval_qa_benchmark/transforms/myscale_retrieval/*"]
+
