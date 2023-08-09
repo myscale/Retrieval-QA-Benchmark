@@ -9,7 +9,7 @@ from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 def mcma_fuzzy_matcher(pred: str, gold: QARecord) -> bool:
     pred = pred.split("\n\n")[0]
-    pred = ' '.join([p for p in pred.spit(' ') if p != ''])
+    pred = ' '.join([p for p in pred.split(' ') if p != ''])
     if gold.answer in pred:
         return True
     if gold.choices is not None:
