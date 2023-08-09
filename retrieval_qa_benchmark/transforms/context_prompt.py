@@ -78,6 +78,6 @@ def insert_context(
     else:
         context_num = context_part.count("\n")
         for i in range(len(context)):
-            context_part.append(f"[{context_num + i}] {context[i]}")
+            context_part.append(f"[{context_num + i + 1}] {context[i]}")
     context_part_ = sep_chr.join(context_part)
     return prefix + sep_chr.join([f"{context_part_}\n", query]) + suffix

@@ -16,7 +16,7 @@ def get_func(obj: BaseTransform, name: str) -> Callable:
         return getattr(obj, method_name)
     except AttributeError:
 
-        def default_func(data: Dict[str, Any]) -> str:
+        def default_func(data: Dict[str, Any], **params) -> str:
             if name in data:
                 return str(data[name])
             else:
@@ -47,7 +47,7 @@ class BaseTransform(BaseModel):
         try:
             return data["raw_question"]
         except KeyError:
-            return data["question"]
+            return get_func(self, 'question')(data, **params)
 
     def __call__(self, data: Dict[str, Any]) -> QARecord:
         return QARecord(**{k: v for k, v in self.chain(data).items() if v is not None})
