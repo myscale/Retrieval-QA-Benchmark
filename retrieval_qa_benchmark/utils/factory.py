@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Sequence, List
+from typing import Any, Dict, Optional, Sequence
 
 from pydantic import BaseModel, Extra
 
-from retrieval_qa_benchmark.schema import BaseDataset
-from retrieval_qa_benchmark.schema import BaseLLM
-from retrieval_qa_benchmark.schema import BaseTransform, TransformChain
-
+from retrieval_qa_benchmark.schema import (
+    BaseDataset,
+    BaseLLM,
+    BaseTransform,
+    TransformChain,
+)
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, List, Sequence
+from typing import Any, Dict, List, Optional
 
-from retrieval_qa_benchmark.schema import BaseDataset
 from retrieval_qa_benchmark.datasets.helper import build_hfdataset_internal
-from retrieval_qa_benchmark.schema import BaseTransform
+from retrieval_qa_benchmark.schema import BaseDataset, BaseTransform
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 

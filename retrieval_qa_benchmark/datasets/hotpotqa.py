@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional
 
-from retrieval_qa_benchmark.schema import BaseDataset
 from retrieval_qa_benchmark.datasets.helper import build_hfdataset_internal
-from retrieval_qa_benchmark.schema import BaseTransform
+from retrieval_qa_benchmark.schema import BaseDataset, BaseTransform
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
@@ -13,10 +12,8 @@ class HotpotQATransform(BaseTransform):
         self, data: Dict[str, Any], **params: Any
     ) -> Optional[List[str]]:
         return None
-    
-    def transform_question(
-        self, data: Dict[str, Any], **params: Any
-    ) -> str:
+
+    def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
         return f"Question: {data['question']}\n"
 
 

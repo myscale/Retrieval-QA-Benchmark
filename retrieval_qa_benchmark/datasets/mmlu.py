@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 from hashlib import sha256
-from typing import Any, Dict, Optional, Sequence, List
+from typing import Any, Dict, List, Optional
 
-from ast import literal_eval
-from retrieval_qa_benchmark.schema import BaseDataset
 from retrieval_qa_benchmark.datasets.helper import build_hfdataset_internal
-from retrieval_qa_benchmark.schema import BaseTransform
+from retrieval_qa_benchmark.schema import BaseDataset, BaseTransform
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 

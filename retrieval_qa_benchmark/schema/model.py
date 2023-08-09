@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import Any
 
 from pydantic import BaseModel
+
 from retrieval_qa_benchmark.utils.profiler import PROFILER
+
 
 class BaseLLMOutput(BaseModel):
     generated: str
@@ -16,12 +18,12 @@ class BaseLLM(BaseModel):
 
     @property
     def tokenizer_type(self) -> str:
-        return 'tiktoken'
+        return "tiktoken"
 
     @classmethod
     def build(cls, *args: Any, **kwargs: Any) -> BaseLLM:
         raise NotImplementedError
-    
+
     @PROFILER.profile_function("BaseModel.generate")
     def generate(
         self,
@@ -29,5 +31,5 @@ class BaseLLM(BaseModel):
     ) -> BaseLLMOutput:
         return self._generate(text)
 
-    def _generate(self, text:str) -> BaseLLMOutput:
+    def _generate(self, text: str) -> BaseLLMOutput:
         raise NotImplementedError

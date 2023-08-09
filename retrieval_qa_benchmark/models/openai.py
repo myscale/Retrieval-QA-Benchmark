@@ -7,7 +7,7 @@ import openai
 
 from retrieval_qa_benchmark.schema import BaseLLM, BaseLLMOutput
 from retrieval_qa_benchmark.utils.registry import REGISTRY
-from retrieval_qa_benchmark.utils.profiler import PROFILER
+
 
 @REGISTRY.register_model("remote-llm")
 class RemoteLLM(BaseLLM):
@@ -19,10 +19,12 @@ class RemoteLLM(BaseLLM):
         cls,
         model_name: str = "llama2-13b-chat",
         api_base: str = os.getenv("OPENAI_API_BASE", "http://10.1.3.28:8990/v1"),
-        api_key: str = os.getenv("OPENAI_API_KEY", "sk-some-super-secret-key-you-will-never-know"),
+        api_key: str = os.getenv(
+            "OPENAI_API_KEY", "sk-some-super-secret-key-you-will-never-know"
+        ),
         system_prompt: Optional[str] = None,
         run_args: Optional[Dict[str, Any]] = None,
-    ) -> GPT:
+    ) -> RemoteLLM:
         openai.api_base = api_base
         openai.api_key = api_key
         return cls(
@@ -41,15 +43,15 @@ class RemoteLLM(BaseLLM):
             **self.run_args,
         )
 
-        return BaseLLMOutput(generated=completion.choices[0].text,
-                             prompt_tokens=completion.usage.prompt_tokens,
-                             completion_tokens=completion.usage.completion_tokens)
-
+        return BaseLLMOutput(
+            generated=completion.choices[0].text,
+            prompt_tokens=completion.usage.prompt_tokens,
+            completion_tokens=completion.usage.completion_tokens,
+        )
 
 
 @REGISTRY.register_model("gpt35")
 class GPT(RemoteLLM):
-
     @classmethod
     def build(
         cls,
@@ -82,6 +84,8 @@ class ChatGPT(GPT):
             ],
             **self.run_args,
         )
-        return BaseLLMOutput(generated=completion.choices[0].message.content,
-                            prompt_tokens=completion.usage.prompt_tokens,
-                            completion_tokens=completion.usage.completion_tokens)
+        return BaseLLMOutput(
+            generated=completion.choices[0].message.content,
+            prompt_tokens=completion.usage.prompt_tokens,
+            completion_tokens=completion.usage.completion_tokens,
+        )
