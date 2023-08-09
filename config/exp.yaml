@@ -1,5 +1,5 @@
 evaluator:
-  out_file: "test.jsonl"
+  out_file: None
   dataset: 
     name: "mmlu"
   transform_chain:
@@ -7,23 +7,14 @@ evaluator:
       args:
         sep_chr: "\n"
         prompt_suffix: "Answer: "
-        prompt_prefix: "The following are multiple choice questions (with answers)\n"
-    - name: add_context
-      args:
-        sep_chr: "\n"
-        prompt_prefix: "Context:"
-        context: ['1','2']
-        replace: False
+        prompt_prefix: "The following are multiple choice questions (with answers) with context:\n"
     - name: add_myscale_retrieval
       args: 
-        replace: False
         num_selected: 5
         num_filtered: 100
         rank_dict:
           mpnet: 30
           bm25: 40
-
-        
   model:
     name: "remote-llm"
     args:
@@ -37,5 +28,3 @@ evaluator:
       max_tokens: 30
       stop: "\n\n"
 
-
-  
