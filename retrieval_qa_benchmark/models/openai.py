@@ -17,7 +17,7 @@ class RemoteLLM(BaseLLM):
     @classmethod
     def build(
         cls,
-        model_name: str = "llama2-13b-chat",
+        model: str = "llama2-13b-chat",
         api_base: str = os.getenv("OPENAI_API_BASE", "http://10.1.3.28:8990/v1"),
         api_key: str = os.getenv(
             "OPENAI_API_KEY", "sk-some-super-secret-key-you-will-never-know"
@@ -28,7 +28,7 @@ class RemoteLLM(BaseLLM):
         openai.api_base = api_base
         openai.api_key = api_key
         return cls(
-            model_name=model_name,
+            model=model,
             run_args=run_args or {},
             system_prompt=system_prompt or "",
         )
@@ -38,7 +38,7 @@ class RemoteLLM(BaseLLM):
         text: str,
     ) -> BaseLLMOutput:
         completion = openai.Completion.create(
-            model=self.model_name,
+            model=self.model,
             prompt="\n".join([self.system_prompt, text]),
             **self.run_args,
         )
@@ -55,7 +55,7 @@ class GPT(RemoteLLM):
     @classmethod
     def build(
         cls,
-        model_name: str = "text-davinci-003",
+        model: str = "text-davinci-003",
         api_base: str = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
         api_key: str = os.getenv("OPENAI_API_KEY", ""),
         system_prompt: Optional[str] = None,
@@ -64,7 +64,7 @@ class GPT(RemoteLLM):
         openai.api_base = api_base
         openai.api_key = api_key
         return cls(
-            model_name=model_name,
+            model=model,
             run_args=run_args or {},
             system_prompt=system_prompt or "",
         )
@@ -77,7 +77,7 @@ class ChatGPT(GPT):
         text: str = "",
     ) -> BaseLLMOutput:
         completion = openai.ChatCompletion.create(
-            model=self.model_name,
+            model=self.model,
             messages=[
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": text},
