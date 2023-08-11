@@ -1,0 +1,11 @@
+name: "remote-llm"
+args:
+  model: "llama2-13b-chat"
+  api_base: "http://10.1.3.28:8990/v1"
+  api_key: "sk-some-super-secret-key-you-will-never-know"
+  system_prompt: ""
+run_args:
+  temperature: 0.0
+  top_p: 1.0
+  max_tokens: 30
+  stop: "\n\n"

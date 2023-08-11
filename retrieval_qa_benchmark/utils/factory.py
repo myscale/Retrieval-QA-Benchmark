@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Sequence
+from typing import Any, Dict, Optional, Sequence, Union
 
 from pydantic import BaseModel, Extra
 
@@ -38,16 +38,41 @@ class DatasetFactory(BaseFactory):
 
 
 class TransformFactory(BaseFactory):
+    @classmethod
+    def from_config(cls, id:str, config: Dict[str, Any]) -> BaseFactory:
+        name = config["name"]
+        args = config["args"] if "args" in config else {}
+        run_args = config["run_args"] if "run_args" in config else {}
+        return cls(id=id, name=name, args=args, run_args=run_args)
+    
     def build(self) -> BaseTransform:
         return REGISTRY.Transforms[self.name](**self.args)
 
 
 class TransformChainFactory(BaseModel):
-    chain_config: Sequence[TransformFactory] = []
+    chain_config: Union[Dict[str, Any], Sequence[Any]] = []
 
     def build(self) -> TransformChain:
-        transforms = [c.build() for c in self.chain_config]
-        return TransformChain(chain=transforms)
+        if 'chain' in self.chain_config and len(self.chain_config['chain']) > 0:
+            chain_config = self.chain_config['chain']
+            if type(chain_config) in [list, tuple]:
+                entry_id = "0"
+                transforms = {str(i): TransformFactory.from_config(str(i), c).build() for i, c in enumerate(chain_config)}
+                for i in range(len(self.chain_config)):
+                    if i > 0:
+                        transforms[str(i-1)].children = (transforms[str(i)], transforms[str(i)])
+            else:
+                entry_id = self.chain_config["entry_id"]
+                transforms = {k: TransformFactory.from_config(k, c).build() for k, c in chain_config.items()}
+                for k, c in chain_config.items():
+                    transforms[k].children = (transforms[c['children'][0]] if c['children'][0] is not None else None, 
+                                            transforms[c['children'][1]] if c['children'][1] is not None else None,)
+            assert entry_id != "", "Entry ID must not be empty for dictionary of transforms"
+            assert entry_id in transforms, "Entry ID must be in keys of transform dictionary"
+        else:
+            entry_id = ""
+            transforms = {}
+        return TransformChain(entry_id=entry_id, chain=transforms)
 
 
 class ModelFactory(BaseFactory):

@@ -1,0 +1,19 @@
+evaluator:
+  transform_chain:
+    entry_id: t1
+    chain:
+      t1:
+        name: dummy1
+        children: 
+          - t2
+          - t3
+      t2:
+        children: 
+          - null
+          - t1
+        name: dummy2
+      t3:
+        children: 
+          - null
+          - null
+        name: dummy3

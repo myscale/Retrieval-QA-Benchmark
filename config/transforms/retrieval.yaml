@@ -1,0 +1,7 @@
+name: add_myscale_retrieval
+args: 
+  num_selected: 5
+  num_filtered: 100
+  rank_dict:
+    mpnet: 30
+    bm25: 40

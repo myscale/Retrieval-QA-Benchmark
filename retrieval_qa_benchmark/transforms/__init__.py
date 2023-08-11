@@ -1,5 +1,4 @@
 from retrieval_qa_benchmark.transforms.context_prompt import (
-    AddContextTransform,
     AddMyScaleRetrievalTransform,
 )
 from retrieval_qa_benchmark.transforms.mcma_prompt import (
@@ -14,6 +13,5 @@ __all__ = [
     "MultipleChoiceMultipleAnswerTransform",
     "FewshotMultipleChoiceTransform",
     "MultipleChoiceTransform",
-    "AddContextTransform",
     "AddMyScaleRetrievalTransform",
 ]

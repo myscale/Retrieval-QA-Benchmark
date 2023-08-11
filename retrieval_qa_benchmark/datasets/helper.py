@@ -19,7 +19,7 @@ def build_hfdataset_internal(
     data = load_dataset(*name, **kwargs)[eval_split]
     try:
         eval_set: List[QARecord] = [
-            transform(d) for d in tqdm(data, desc="Converting dataset...")
+            transform(d)[1] for d in tqdm(data, desc="Converting dataset...")
         ]
         return f"{'.'.join(name)}-{eval_split}", eval_set
     except Exception as e:

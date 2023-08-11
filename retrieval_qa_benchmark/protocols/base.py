@@ -38,12 +38,12 @@ class BaseEvaluator(BaseModel):
     def from_config(cls, config: Dict[str, Any]) -> BaseEvaluator:
         config = config["evaluator"]
         dataset = DatasetFactory.from_config(config["dataset"]).build()
-        transform = TransformChainFactory(
-            chain_config=[
-                TransformFactory.from_config(c)  # type: ignore
-                for c in config["transform_chain"]
-            ]
-        ).build()
+        if "transform_chain" in config:
+            transform = TransformChainFactory(
+                chain_config=config["transform_chain"]
+            ).build()
+        else:
+            transform = TransformChainFactory(chain_config=[]).build()
         model = ModelFactory.from_config(config["model"]).build()
         out_file = config["out_file"] if "out_file" in config else None
         return cls(dataset=dataset, transform=transform, llm=model, out_file=out_file)
@@ -73,7 +73,7 @@ class BaseEvaluator(BaseModel):
         acc = 100 * cnt / len(self.dataset)
         logger.info(
             f"Evaluation finished! Executed Evaluator:{type(self)} on "
-            f"Dataset:{self.dataset.name} with Model:{self.llm.model_name}. "
+            f"Dataset:{self.dataset.name} with Model:{self.llm.model}. "
             f"Accuracy: {acc:.2f}%"
         )
         if self.out_file:
