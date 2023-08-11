@@ -18,8 +18,8 @@ from retrieval_qa_benchmark.utils.factory import (
     DatasetFactory,
     ModelFactory,
     TransformChainFactory,
-    TransformFactory,
 )
+from retrieval_qa_benchmark.utils.profiler import PROFILER
 
 
 class BaseEvaluator(BaseModel):
@@ -54,26 +54,39 @@ class BaseEvaluator(BaseModel):
         for d in tqdm(self.dataset.eval_set, desc="Evaluating"):
             try:
                 d_ = self.transform(d)
-                pred = self.llm.generate(d_.question)
+                pred = self.llm.generate(d_)
                 mtch = self.matcher(pred.generated, d_)
                 if mtch:
                     cnt += 1
+                prompt_tokens = pred.prompt_tokens
+                completion_tokens = pred.completion_tokens
+                if len(d_.stack) > 0:
+                    prompt_tokens += sum([p.prompt_tokens for p in d_.stack])
+                    completion_tokens += sum([p.completion_tokens for p in d_.stack])
+                profile_avg = {
+                    k: PROFILER.accumulator[k] / PROFILER.counter[k]
+                    for k in PROFILER.accumulator.keys()
+                }
                 result.append(
                     QAPrediction(
                         **d_.model_dump(),
                         pred=pred.generated,
                         matched=mtch,
-                        prompt_tokens=pred.prompt_tokens,
-                        completion_tokens=pred.completion_tokens,
+                        prompt_tokens=prompt_tokens,
+                        completion_tokens=completion_tokens,
+                        profile_avg=profile_avg,
+                        profile_count=PROFILER.counter,
+                        profile_time=PROFILER.accumulator,
                     )
                 )
+                PROFILER.clear()
             except Exception as e:
                 logger.error(f"Failed to evaluate record {str(d)}")
                 raise e
         acc = 100 * cnt / len(self.dataset)
         logger.info(
             f"Evaluation finished! Executed Evaluator:{type(self)} on "
-            f"Dataset:{self.dataset.name} with Model:{self.llm.model}. "
+            f"Dataset:{self.dataset.name} with Model:{self.llm.name}. "
             f"Accuracy: {acc:.2f}%"
         )
         if self.out_file:

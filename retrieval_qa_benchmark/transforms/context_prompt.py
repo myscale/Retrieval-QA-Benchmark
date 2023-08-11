@@ -34,10 +34,10 @@ class AddMyScaleRetrievalTransform(BaseTransform):
     def transform_context(self, data: Dict[str, Any], **params: Any) -> List[str]:
         question = data["question"]
         choices = "\n".join(
-            [f"{chr(65+i)}. {v}" for i, v in enumerate(data['choices'])]
+            [f"{chr(65+i)}. {v}" for i, v in enumerate(data["choices"])]
         )
         context = self._retrieval(
-            '\n'.join([question, choices]),
+            "\n".join([question, choices]),
             self.num_filtered,
             self.num_selected,
             self.with_title,
@@ -45,23 +45,3 @@ class AddMyScaleRetrievalTransform(BaseTransform):
             simple=True,
         )
         return context
-
-
-def insert_context(
-    question: str,
-    query: str,
-    sep_chr: str,
-    context_prompt: str,
-    context: Union[List[Any], str],
-) -> str:
-    query = query.split("\n")[0]
-    prefix, suffix = question.split(query)
-    context_part = [context_prompt]
-    if isinstance(context, str):
-        context_part.append(context)
-    else:
-        context_num = context_part.count("\n")
-        for i in range(len(context)):
-            context_part.append(f"[{context_num + i + 1}] {context[i]}")
-    context_part_ = sep_chr.join(context_part)
-    return prefix + sep_chr.join([f"{context_part_}\n", query]) + suffix

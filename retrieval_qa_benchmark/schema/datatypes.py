@@ -1,7 +1,6 @@
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Union
 
-import numpy as np
-from pydantic import BaseModel, Extra, validator, model_validator
+from pydantic import BaseModel, Extra
 
 
 class QARecord(BaseModel):
@@ -20,7 +19,10 @@ class QARecord(BaseModel):
 
 
 class QAPrediction(QARecord):
-    prompt_tokens: int = 0 
+    prompt_tokens: int = 0
     completion_tokens: int = 0
     pred: str
     matched: bool
+    profile_time: Optional[Dict[str, Union[int, float]]] = {}
+    profile_count: Optional[Dict[str, int]] = {}
+    profile_avg: Optional[Dict[str, float]] = {}

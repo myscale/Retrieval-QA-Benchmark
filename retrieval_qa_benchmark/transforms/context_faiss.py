@@ -38,8 +38,6 @@ class MyScaleSearch(object):
         self.index = faiss.read_index(index_path)
         print("load mpnet model...")
         self.model = SentenceTransformer(model_name)
-        print("load Colbert model...")
-        self.Colbert_init()
 
     @PROFILER.profile_function("database.MyScaleSearch.profile")
     def __call__(
@@ -86,30 +84,6 @@ class MyScaleSearch(object):
             return result_list
         return entry_list
 
-    def Colbert_init(self, num_gpu: int = 1) -> None:
-        from multiprocessing import current_process
-
-        from transformers import AutoConfig, AutoTokenizer
-
-        from retrieval_qa_benchmark.transforms.myscale_retrieval.hf_colbert import (
-            HF_ColBERT,
-        )
-
-        global worker_id
-        worker_id = 0
-        if num_gpu > 1:
-            worker_id = (current_process()._identity[0] - 1) % num_gpu
-
-        colbert_tokenizer = AutoTokenizer.from_pretrained("colbert-ir/colbertv2.0")
-        loadedConfig = AutoConfig.from_pretrained("colbert-ir/colbertv2.0")
-        loadedConfig.dim = 128
-        colbert_model = HF_ColBERT.from_pretrained(
-            "colbert-ir/colbertv2.0", loadedConfig
-        ).to(f"cuda:{worker_id}")
-        colbert_model.eval()
-        self.colbert_tokenizer = colbert_tokenizer
-        self.colbert_model = colbert_model
-
     @PROFILER.profile_function("database.MyScaleSearch.emb_filter.profile")
     def emb_filter(
         self, query_list: list, num_filtered: int
@@ -124,46 +98,3 @@ class MyScaleSearch(object):
             para_id_list, self.dataset, self.dataset_name
         )
         return D_list, entry_list
-
-    @PROFILER.profile_function("database.MyScaleSearch.hybrid_search.profile")
-    def hybrid_search(
-        self,
-        question_list: list[str],
-        entry_list: list[list[tuple]],
-        num_selected: int,
-        with_title: bool = True,
-        rank_dict: dict = {"mpnet": 30, "bm25": 40},
-        show_progress: bool = False,
-    ) -> List[List[Tuple]]:  # (rank, para_id, title, para)
-        _entry_list = rrf_hybrid_search(
-            question_list,
-            entry_list,
-            num_selected,
-            with_title,
-            rank_dict,
-            self.colbert_tokenizer,
-            self.colbert_model,
-            show_progress,
-        )
-        return _entry_list
-
-    @PROFILER.profile_function("database.MyScaleSearch.filtered_hybrid_search.profile")
-    def filtered_hybrid_search(
-        self,
-        question_list: list[str],
-        num_filtered: int,
-        num_selected: int,
-        with_title: bool = True,
-        rank_dict: dict = {"mpnet": 30, "bm25": 40},
-        show_progress: bool = False,
-    ) -> List[List[Tuple]]:
-        D_list, entry_list = self.emb_filter(question_list, num_filtered)
-        _entry_list = self.hybrid_search(
-            question_list,
-            entry_list,
-            num_selected,
-            with_title,
-            rank_dict,
-            show_progress,
-        )
-        return _entry_list

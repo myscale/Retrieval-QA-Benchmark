@@ -23,7 +23,6 @@ class BaseDataset(BaseModel):
     def build(cls, *args: Any, **kwargs: Any) -> BaseDataset:
         raise NotImplementedError("Please implement a `.build` function")
 
-    @PROFILER.profile_function("BaseDataset.__getitem__")
     def __getitem__(self, index: int) -> QARecord:
         return self.eval_set[index]
 

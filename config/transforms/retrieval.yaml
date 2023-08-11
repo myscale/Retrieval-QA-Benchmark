@@ -1,4 +1,4 @@
-name: add_myscale_retrieval
+type: add_myscale_retrieval
 args: 
   num_selected: 5
   num_filtered: 100
