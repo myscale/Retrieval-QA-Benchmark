@@ -1,16 +1,13 @@
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional
 
 import nltk
-import numpy as np
-import pandas as pd
-import torch.nn.functional as F
-from tqdm import tqdm
 
 nltk.download("stopwords")
 nltk.download("punkt")
 nltk.download("averaged_perceptron_tagger")
 nltk.download("wordnet")
+
 
 ## test preprocess
 def text_preprocess(text: str) -> List[str]:

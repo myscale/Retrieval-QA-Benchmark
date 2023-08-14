@@ -1,12 +1,13 @@
 from typing import Any, Callable, Dict
 
 from pydantic import BaseModel, Extra
-from retrieval_qa_benchmark.utils.profiler import PROFILER, Profiler
+
+from retrieval_qa_benchmark.utils.profiler import PROFILER
 
 
 class Registry(BaseModel):
-    """
-    """
+    """ """
+
     Datasets: Dict[str, Any] = {}
     Transforms: Dict[str, Any] = {}
     LLMs: Dict[str, Any] = {}

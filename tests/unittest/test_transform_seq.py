@@ -1,8 +1,10 @@
-from typing import Any, Dict
-import pytest
 import random
+from typing import Any, Dict
+
+import pytest
 import yaml
-from retrieval_qa_benchmark.schema import BaseTransform, TransformChain, QARecord
+
+from retrieval_qa_benchmark.schema import BaseTransform, QARecord
 from retrieval_qa_benchmark.utils.factory import TransformChainFactory
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
@@ -29,8 +31,7 @@ class Dummy_3(BaseTransform):
 
 
 @pytest.mark.parametrize("num_base", [random.randint(0, 100) for _ in range(10)])
-def test_seq_1(num_base):
-    import math
+def test_seq_1(num_base: int) -> None:
     from os import path
 
     num_base = 20
@@ -50,9 +51,8 @@ def test_seq_1(num_base):
         )
     )
     assert chain.chain["0"].children == (chain.chain["1"], chain.chain["1"])
-    assert d.question[:18] == 'dummy3dummy2dummy1'
-
+    assert d.question[:18] == "dummy3dummy2dummy1"
 
 
 if __name__ == "__main__":
-    test_seq_1()
+    test_seq_1(20)

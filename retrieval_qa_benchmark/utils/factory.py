@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Sequence, Union
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Extra
 
@@ -14,8 +14,8 @@ from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
 class BaseFactory(BaseModel):
-    """
-    """
+    """ """
+
     type: str
     args: Optional[Dict[str, Any]] = {}
     run_args: Optional[Dict[str, Any]] = {}
@@ -24,7 +24,7 @@ class BaseFactory(BaseModel):
         extra = Extra.ignore
 
     @classmethod
-    def from_config(cls, config: Dict[str, Any]) -> BaseFactory:
+    def from_config(cls, config: Dict[str, Any], **kwargs: Any) -> BaseFactory:
         type = config["type"]
         args = config["args"] if "args" in config else {}
         run_args = config["run_args"] if "run_args" in config else {}
@@ -35,17 +35,21 @@ class BaseFactory(BaseModel):
 
 
 class DatasetFactory(BaseFactory):
-    """
-    """
+    """ """
+
     def build(self) -> BaseDataset:
         return REGISTRY.Datasets[self.type].build(**self.args)
 
 
 class TransformFactory(BaseFactory):
-    """
-    """
+    """ """
+
+    id: str = "default"
+
     @classmethod
-    def from_config(cls, id: str, config: Dict[str, Any]) -> BaseFactory:
+    def from_config(
+        cls, config: Dict[str, Any], id: str = "default", **kwargs: Any
+    ) -> BaseFactory:
         type = config["type"]
         args = config["args"] if "args" in config else {}
         run_args = config["run_args"] if "run_args" in config else {}
@@ -56,9 +60,9 @@ class TransformFactory(BaseFactory):
 
 
 class TransformChainFactory(BaseModel):
-    """
-    """
-    chain_config: Union[Dict[str, Any], Sequence[Any]] = []
+    """ """
+
+    chain_config: Dict[str, Any] = {}
 
     def build(self) -> TransformChain:
         if "chain" in self.chain_config and len(self.chain_config["chain"]) > 0:
@@ -66,7 +70,7 @@ class TransformChainFactory(BaseModel):
             if type(chain_config) in [list, tuple]:
                 entry_id = "0"
                 transforms = {
-                    str(i): TransformFactory.from_config(str(i), c).build()
+                    str(i): TransformFactory.from_config(c, id=str(i)).build()
                     for i, c in enumerate(chain_config)
                 }
                 for i in range(len(chain_config)):
@@ -79,7 +83,7 @@ class TransformChainFactory(BaseModel):
             else:
                 entry_id = self.chain_config["entry_id"]
                 transforms = {
-                    k: TransformFactory.from_config(k, c).build()
+                    k: TransformFactory.from_config(c, id=k).build()
                     for k, c in chain_config.items()
                 }
                 for k, c in chain_config.items():
@@ -104,7 +108,7 @@ class TransformChainFactory(BaseModel):
 
 
 class ModelFactory(BaseFactory):
-    """
-    """
+    """ """
+
     def build(self) -> BaseLLM:
         return REGISTRY.LLMs[self.type].build(**self.args, run_args=self.run_args)

@@ -1,8 +1,10 @@
-from typing import Any, Dict
-import pytest
 import random
+from typing import Any, Dict
+
+import pytest
 import yaml
-from retrieval_qa_benchmark.schema import BaseTransform, TransformChain, QARecord
+
+from retrieval_qa_benchmark.schema import BaseTransform, QARecord
 from retrieval_qa_benchmark.utils.factory import TransformChainFactory
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
@@ -29,7 +31,7 @@ class Dummy_3(BaseTransform):
 
 
 @pytest.mark.parametrize("num_base", [random.randint(20, 50) for _ in range(10)])
-def test_DAG_1(num_base):
+def test_DAG_1(num_base: int) -> None:
     import math
     from os import path
 
@@ -48,12 +50,12 @@ def test_DAG_1(num_base):
             id="test1", question="*" * num_base, answer="answer for test 1", type="open"
         )
     )
-    cnt = math.ceil((100 - num_base) / 6) 
-    assert cnt * 6 + 12 - 6 * (cnt%2) + num_base == len(
+    cnt = math.ceil((100 - num_base) / 6)
+    assert cnt * 6 + 12 - 6 * (cnt % 2) + num_base == len(
         d.question
     ), "Execution count mismatched"
     assert d.question[:6] == "dummy3", "Final state should be dummy"
 
 
 if __name__ == "__main__":
-    test_DAG_1()
+    test_DAG_1(20)

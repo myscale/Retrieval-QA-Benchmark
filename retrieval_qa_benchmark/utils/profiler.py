@@ -6,6 +6,7 @@ from pydantic import BaseModel, Extra
 
 class Profiler(BaseModel):
     """"""
+
     counter: Dict[str, int] = {}
     accumulator: Dict[str, float] = {}
 
@@ -57,7 +58,7 @@ class Profiler(BaseModel):
 
         return decorator
 
-    def clear(self):
+    def clear(self) -> None:
         self.counter = {}
         self.accumulator = {}
 

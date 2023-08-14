@@ -1,11 +1,11 @@
-from pydantic import BaseModel, Extra
 import re
-from loguru import logger
+from typing import Any, List, Optional, Sequence, Tuple
+
 from datasets import load_dataset
-import numpy as np
+from loguru import logger
 from parse import parse
-from typing import Union, List, Any, Tuple, Sequence
-from abc import abstractmethod
+from pydantic import BaseModel, Extra
+
 
 class Entry(BaseModel):
     rank: int
@@ -13,64 +13,83 @@ class Entry(BaseModel):
     title: str
     paragraph: str
 
+
 class BaseSearcher(BaseModel):
     """"""
+
     template: str = "{title} | {paragraph}"
-    
+
     class Config:
         extra = Extra.allow
-    
-    def __init__(self, *args, **kwargs) -> None:
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-    
+
     def __call__(
         self,
-        question: Union[str, List[str]],
+        question: List[str],
         num_selected: int = 15,
-        context: List[str] = None,
+        context: Optional[List[List[str]]] = None,
     ) -> List[str]:
-        if type(question) is str:
-            question = [question]
+        if context:
+            assert len(question) == len(context)
         D_list, entry_list = self.search(question, num_selected, context=context)
         return self.format(entry_list, D_list)
-    
-    def parse_context(self, context: List[str]) -> Tuple[List[float], List[Entry]]:
-        entry_list: List[Entry] = []
-        D_list: List[float] = []
-        for i, c in enumerate(context):
-            d = parse(self.template, c)
-            entry_list.append(Entry(rank=i, paragraph_id=i, title=d['title'], paragraph=d['paragraph']))
-            D_list.append(i+1/len(context))
-        return D_list, entry_list
-        
-    @abstractmethod
-    def search(self, query_list: list, num_selected: int, context: List[str] = None) -> Tuple[List[float], Union[List[Entry], List[List[Entry]]]]:
-        raise NotImplementedError    
 
-    def format(self, entry_list: Union[List[Entry], List[List[Entry]]], D_list: List[float]) -> List[str]:
+    def parse_context(
+        self, context: List[List[str]]
+    ) -> Tuple[List[List[float]], List[List[Entry]]]:
+        entry_list: List[List[Entry]] = []
+        D_list: List[List[float]] = []
+        for con in context:
+            temp_d_list = []
+            temp_entries = []
+            for i, c in enumerate(con):
+                d = parse(self.template, c)
+                temp_entries.append(
+                    Entry(
+                        rank=i,
+                        paragraph_id=i,
+                        title=d["title"],
+                        paragraph=d["paragraph"],
+                    )
+                )
+                temp_d_list.append(i + 1 / len(context))
+            D_list.append(temp_d_list)
+            entry_list.append(temp_entries)
+        return D_list, entry_list
+
+    def search(
+        self,
+        query_list: List[str],
+        num_selected: int,
+        context: Optional[List[List[str]]] = None,
+    ) -> Tuple[List[List[float]], List[List[Entry]]]:
+        raise NotImplementedError
+
+    def format(
+        self, entry_list: List[List[Entry]], D_list: List[List[float]]
+    ) -> List[str]:
         result_list: List[str] = []
-        for entries, d in zip(entry_list, D_list):
-            if type(entries) is Entry:
-                result_list.append(self.template.format(title=entries.title, paragraph=entries.paragraph, distance=d))
-            else:
-                results = []
-                for entry in entries:
-                    results.append(self.template.format(title=entry.title, paragraph=entry.paragraph, distance=d))
-                result_list.extend(results)
+        for entries, dlist in zip(entry_list, D_list):
+            results = []
+            for entry, d in zip(entries, dlist):
+                results.append(
+                    self.template.format(
+                        title=entry.title, paragraph=entry.paragraph, distance=d
+                    )
+                )
+            result_list.extend(results)
         return result_list
-    
-    
+
+
 class PluginVectorSearcher(BaseSearcher):
-    """
-    """
+    """ """
+
     dataset_name: Sequence[str] = ["Cohere/wikipedia-22-12-en-embeddings"]
     dataset_split: str = "train"
-    
-    def __init__(
-        self,
-        *args,
-        **kwargs
-    ):
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         # TODO @mpskex: expand supported knowledge base
         assert self.dataset_name in (
@@ -79,9 +98,10 @@ class PluginVectorSearcher(BaseSearcher):
         )
         logger.info("load dataset...")
         self.dataset = load_dataset(*self.dataset_name, split=self.dataset_split)
-    
-    
-    def para_id_to_entry(self, para_id: str, start_para_list: List[int]) -> Tuple[str, str]:
+
+    def para_id_to_entry(
+        self, para_id: int, start_para_list: Optional[List[int]]
+    ) -> Tuple[str, str]:
         para_id_ = int(para_id)
         if start_para_list is None:
             title = self.dataset[para_id_]["title"]
@@ -98,20 +118,16 @@ class PluginVectorSearcher(BaseSearcher):
             ][para_id_ - start_para_list[title_id - 1]]
         return title, para
 
-    def para_id_list_to_entry(self, para_id_list: List[Any]) -> Union[List[Entry], List[List[Entry]]]:
+    def para_id_list_to_entry(self, para_id_list: List[List[int]]) -> List[List[Entry]]:
         start_para_list = None
         entry_list = []
-        if type(para_id_list[0]) == list or type(para_id_list[0]) == np.ndarray:
-            for paras_id in para_id_list:
-                entries = []
-                for i in range(len(paras_id)):
-                    para_id = paras_id[i]
-                    title, para = self.para_id_to_entry(para_id, start_para_list)
-                    entries.append(Entry(rank=i, paragraph_id=para_id, title=title, paragraph=para))
-                entry_list.append(entries)
-        else:
-            for i in range(len(para_id_list)):
-                para_id = para_id_list[i]
+        for paras_id in para_id_list:
+            entries = []
+            for i in range(len(paras_id)):
+                para_id = paras_id[i]
                 title, para = self.para_id_to_entry(para_id, start_para_list)
-                entry_list.append(Entry(rank=i, paragraph_id=para_id, title=title, paragraph=para))  # type: ignore
+                entries.append(
+                    Entry(rank=i, paragraph_id=para_id, title=title, paragraph=para)
+                )
+            entry_list.append(entries)
         return entry_list

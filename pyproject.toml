@@ -40,6 +40,7 @@ sphinx = "^7.1.2"
 autodoc-pydantic = "^2.0.1"
 elasticsearch = "^8.9.0"
 parse = "^1.19.1"
+types-pyyaml = "^6.0.12.11"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
@@ -63,5 +64,9 @@ exclude = ["F403"]
 [tool.mypy]
 ignore_missing_imports = "True"
 disallow_untyped_defs = "True"
-exclude = ["retrieval_qa_benchmark/experimental/*", "retrieval_qa_benchmark/transforms/myscale_retrieval/*"]
+exclude = [
+  "retrieval_qa_benchmark/experimental/*", 
+  "retrieval_qa_benchmark/transforms/myscale_retrieval/*", 
+  "docs/"
+]
 

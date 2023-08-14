@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from loguru import logger
 from pydantic import BaseModel, Extra
@@ -9,7 +9,6 @@ from tqdm import tqdm
 from retrieval_qa_benchmark.schema import (
     BaseDataset,
     BaseLLM,
-    BaseTransform,
     QAPrediction,
     QARecord,
     TransformChain,
@@ -27,7 +26,7 @@ class BaseEvaluator(BaseModel):
 
     dataset: BaseDataset
     llm: BaseLLM
-    transform: Union[BaseTransform, TransformChain]
+    transform: TransformChain
     matcher: Callable[[str, QARecord], bool] = lambda x, y: x == y.answer  # noqa: E731
     out_file: Optional[str] = None
 
@@ -43,7 +42,7 @@ class BaseEvaluator(BaseModel):
                 chain_config=config["transform_chain"]
             ).build()
         else:
-            transform = TransformChainFactory(chain_config=[]).build()
+            transform = TransformChainFactory(chain_config={}).build()
         model = ModelFactory.from_config(config["model"]).build()
         out_file = config["out_file"] if "out_file" in config else None
         return cls(dataset=dataset, transform=transform, llm=model, out_file=out_file)
@@ -60,9 +59,11 @@ class BaseEvaluator(BaseModel):
                     cnt += 1
                 prompt_tokens = pred.prompt_tokens
                 completion_tokens = pred.completion_tokens
-                if len(d_.stack) > 0:
-                    prompt_tokens += sum([p.prompt_tokens for p in d_.stack])
-                    completion_tokens += sum([p.completion_tokens for p in d_.stack])
+                if d_.stack and len(d_.stack) > 0:
+                    prompt_tokens += sum([p.prompt_tokens for p in d_.stack if p])
+                    completion_tokens += sum(
+                        [p.completion_tokens for p in d_.stack if p]
+                    )
                 profile_avg = {
                     k: PROFILER.accumulator[k] / PROFILER.counter[k]
                     for k in PROFILER.accumulator.keys()

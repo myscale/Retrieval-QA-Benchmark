@@ -5,9 +5,6 @@ from typing import Any, List
 from pydantic import BaseModel, Extra
 
 from retrieval_qa_benchmark.schema.datatypes import QARecord
-from retrieval_qa_benchmark.utils.profiler import PROFILER
-
-# profiler: Optional[List[BaseProfiler]] = None
 
 
 class BaseDataset(BaseModel):

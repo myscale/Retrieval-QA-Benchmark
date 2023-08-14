@@ -5,7 +5,6 @@ from typing import Any
 from pydantic import BaseModel
 
 from retrieval_qa_benchmark.schema.datatypes import QARecord
-from retrieval_qa_benchmark.utils.profiler import PROFILER
 
 
 class BaseLLMOutput(BaseModel):
@@ -36,7 +35,7 @@ class BaseLLM(BaseModel):
     ) -> BaseLLMOutput:
         return self._generate(self.convert_record(text))
 
-    def convert_record(self, data: QARecord):
+    def convert_record(self, data: QARecord) -> str:
         choices = ""
         if data.choices:
             choices = "\t".join(
