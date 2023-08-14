@@ -4,5 +4,6 @@ evaluator:
   model: !include models/remote-llama2-13b.yaml
   transform_chain:
     chain:
-      - !include transforms/retrieval.yaml
+      - !include transforms/faiss-pre.yaml
+      - !include transforms/hybrid-rerank.yaml
   

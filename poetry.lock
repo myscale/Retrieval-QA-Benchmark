@@ -614,6 +614,42 @@ files = [
 ]
 
 [[package]]
+name = "elastic-transport"
+version = "8.4.0"
+description = "Transport classes and utilities shared among Python Elastic client libraries"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "elastic-transport-8.4.0.tar.gz", hash = "sha256:b9ad708ceb7fcdbc6b30a96f886609a109f042c0b9d9f2e44403b3133ba7ff10"},
+    {file = "elastic_transport-8.4.0-py3-none-any.whl", hash = "sha256:19db271ab79c9f70f8c43f8f5b5111408781a6176b54ab2e54d713b6d9ceb815"},
+]
+
+[package.dependencies]
+certifi = "*"
+urllib3 = ">=1.26.2,<2"
+
+[package.extras]
+develop = ["aiohttp", "mock", "pytest", "pytest-asyncio", "pytest-cov", "pytest-httpserver", "pytest-mock", "requests", "trustme"]
+
+[[package]]
+name = "elasticsearch"
+version = "8.9.0"
+description = "Python client for Elasticsearch"
+optional = false
+python-versions = ">=3.6, <4"
+files = [
+    {file = "elasticsearch-8.9.0-py3-none-any.whl", hash = "sha256:0795cbf0f61482070741c09ba02ac8fdf18f5984912fbd08b248fadd8a8c9952"},
+    {file = "elasticsearch-8.9.0.tar.gz", hash = "sha256:d3367fc013e04fc7aad349a6de9fad1ee04fb6d627b0e7896aa505c12fde5e04"},
+]
+
+[package.dependencies]
+elastic-transport = ">=8,<9"
+
+[package.extras]
+async = ["aiohttp (>=3,<4)"]
+requests = ["requests (>=2.4.0,<3.0.0)"]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.1.2"
 description = "Backport of PEP 654 (exception groups)"
@@ -1508,6 +1544,17 @@ spss = ["pyreadstat (>=1.1.2)"]
 sql-other = ["SQLAlchemy (>=1.4.16)"]
 test = ["hypothesis (>=6.34.2)", "pytest (>=7.3.2)", "pytest-asyncio (>=0.17.0)", "pytest-xdist (>=2.2.0)"]
 xml = ["lxml (>=4.6.3)"]
+
+[[package]]
+name = "parse"
+version = "1.19.1"
+description = "parse() is the opposite of format()"
+optional = false
+python-versions = "*"
+files = [
+    {file = "parse-1.19.1-py2.py3-none-any.whl", hash = "sha256:371ed3800dc63983832159cc9373156613947707bc448b5215473a219dbd4362"},
+    {file = "parse-1.19.1.tar.gz", hash = "sha256:cc3a47236ff05da377617ddefa867b7ba983819c664e1afe46249e5b469be464"},
+]
 
 [[package]]
 name = "parso"
@@ -3055,20 +3102,19 @@ files = [
 
 [[package]]
 name = "urllib3"
-version = "2.0.4"
+version = "1.26.16"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 files = [
-    {file = "urllib3-2.0.4-py3-none-any.whl", hash = "sha256:de7df1803967d2c2a98e4b11bb7d6bd9210474c46e8a0401514e3a42a75ebde4"},
-    {file = "urllib3-2.0.4.tar.gz", hash = "sha256:8d22f86aae8ef5e410d4f539fde9ce6b2113a001bb4d189e0aed70642d602b11"},
+    {file = "urllib3-1.26.16-py2.py3-none-any.whl", hash = "sha256:8d36afa7616d8ab714608411b4a3b13e58f463aee519024578e062e141dce20f"},
+    {file = "urllib3-1.26.16.tar.gz", hash = "sha256:8f135f6502756bde6b2a9b28989df5fbe87c9970cecaa69041edcce7f0589b14"},
 ]
 
 [package.extras]
-brotli = ["brotli (>=1.0.9)", "brotlicffi (>=0.8.0)"]
-secure = ["certifi", "cryptography (>=1.9)", "idna (>=2.0.0)", "pyopenssl (>=17.1.0)", "urllib3-secure-extra"]
-socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
-zstd = ["zstandard (>=0.18.0)"]
+brotli = ["brotli (>=1.0.9)", "brotlicffi (>=0.8.0)", "brotlipy (>=0.6.0)"]
+secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "pyOpenSSL (>=0.14)", "urllib3-secure-extra"]
+socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "wcwidth"
@@ -3390,4 +3436,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "162d0f6c2edf8531dd5de5e6f40099ca8d9bccbf0f63a298e0977fecf94267c0"
+content-hash = "bd78fa4787094d04419cd2d44ede91066107deda303cfcddd87ca35c4de4369f"

@@ -69,12 +69,13 @@ class TransformChainFactory(BaseModel):
                     str(i): TransformFactory.from_config(str(i), c).build()
                     for i, c in enumerate(chain_config)
                 }
-                for i in range(len(self.chain_config)):
+                for i in range(len(chain_config)):
                     if i > 0:
                         transforms[str(i - 1)].children = (
                             transforms[str(i)],
                             transforms[str(i)],
                         )
+                print(transforms)
             else:
                 entry_id = self.chain_config["entry_id"]
                 transforms = {
