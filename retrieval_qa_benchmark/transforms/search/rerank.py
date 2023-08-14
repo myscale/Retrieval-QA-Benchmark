@@ -52,7 +52,7 @@ def Colbert_single(args: Any, is_filter: bool = True) -> Tuple[Any, Any]:
 class RerankSearcher(BaseSearcher):
     """"""
 
-    rank_dict: Dict[str, int] = {"mpnet": 30, "bm25": 40}
+    rank_dict: Dict[str, int] = {"previous": 30, "bm25": 40}
     with_title: bool = True
 
     def __init__(
@@ -149,7 +149,7 @@ class RerankSearcher(BaseSearcher):
             ]
         db_names = ["para_id", "rank_emb"]
         for rank_name in self.rank_dict.keys():
-            if rank_name == "mpnet":
+            if rank_name == "previous":
                 db_names.append("rank_emb")
             elif rank_name == "bm25":
                 rank_bm25, score_bm25 = self.bm25(keywords, words_para_list)
@@ -242,7 +242,7 @@ class RerankSearcher(BaseSearcher):
         return _entry_list
 
     def rrf_result(self, result_db: Dict[str, Any]) -> Dict[str, Any]:
-        _dict = {"mpnet": "rank_emb", "bm25": "rank_bm25", "colbert": "rank_col"}
+        _dict = {"previous": "rank_emb", "bm25": "rank_bm25", "colbert": "rank_col"}
         ranks = []
         rrf_coefficients = []
         for rank_name in self.rank_dict.keys():

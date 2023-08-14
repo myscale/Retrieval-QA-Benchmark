@@ -2,5 +2,5 @@ type: RRFHybrid
 args: 
   num_selected: 5
   rank_dict:
-    mpnet: 30
+    previous: 30
     bm25: 40
