@@ -17,20 +17,22 @@ class RemoteLLM(BaseLLM):
     @classmethod
     def build(
         cls,
-        model_name: str = "llama2-13b-chat",
+        name: str = "llama2-13b-chat",
         api_base: str = os.getenv("OPENAI_API_BASE", "http://10.1.3.28:8990/v1"),
         api_key: str = os.getenv(
             "OPENAI_API_KEY", "sk-some-super-secret-key-you-will-never-know"
         ),
         system_prompt: Optional[str] = None,
         run_args: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
     ) -> RemoteLLM:
         openai.api_base = api_base
         openai.api_key = api_key
         return cls(
-            model_name=model_name,
+            name=name,
             run_args=run_args or {},
             system_prompt=system_prompt or "",
+            **kwargs,
         )
 
     def _generate(
@@ -38,7 +40,7 @@ class RemoteLLM(BaseLLM):
         text: str,
     ) -> BaseLLMOutput:
         completion = openai.Completion.create(
-            model=self.model_name,
+            model=self.name,
             prompt="\n".join([self.system_prompt, text]),
             **self.run_args,
         )
@@ -55,18 +57,20 @@ class GPT(RemoteLLM):
     @classmethod
     def build(
         cls,
-        model_name: str = "text-davinci-003",
+        name: str = "text-davinci-003",
         api_base: str = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
         api_key: str = os.getenv("OPENAI_API_KEY", ""),
         system_prompt: Optional[str] = None,
         run_args: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
     ) -> GPT:
         openai.api_base = api_base
         openai.api_key = api_key
         return cls(
-            model_name=model_name,
+            name=name,
             run_args=run_args or {},
             system_prompt=system_prompt or "",
+            **kwargs,
         )
 
 
@@ -77,7 +81,7 @@ class ChatGPT(GPT):
         text: str = "",
     ) -> BaseLLMOutput:
         completion = openai.ChatCompletion.create(
-            model=self.model_name,
+            model=self.name,
             messages=[
                 {"role": "system", "content": self.system_prompt},
                 {"role": "user", "content": text},
