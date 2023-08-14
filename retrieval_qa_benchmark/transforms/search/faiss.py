@@ -11,7 +11,7 @@ from retrieval_qa_benchmark.utils.profiler import PROFILER
 from .base import Entry, PluginVectorSearcher
 
 
-class FaissSearch(PluginVectorSearcher):
+class FaissSearcher(PluginVectorSearcher):
     """"""
 
     model_name: str

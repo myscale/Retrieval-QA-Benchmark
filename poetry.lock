@@ -2358,6 +2358,20 @@ files = [
 cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
+name = "rake-nltk"
+version = "1.0.6"
+description = "RAKE short for Rapid Automatic Keyword Extraction algorithm, is a domain independent keyword extraction algorithm which tries to determine key phrases in a body of text by analyzing the frequency of word appearance and its co-occurance with other words in the text."
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "rake-nltk-1.0.6.tar.gz", hash = "sha256:7813d680b2ce77b51cdac1757f801a87ff47682c9dbd2982aea3b66730346122"},
+    {file = "rake_nltk-1.0.6-py3-none-any.whl", hash = "sha256:1c1ffdb64cae8cb99d169d53a5ffa4635f1c4abd3a02c6e22d5d083136bdc5c1"},
+]
+
+[package.dependencies]
+nltk = ">=3.6.2,<4.0.0"
+
+[[package]]
 name = "rank-bm25"
 version = "0.2.2"
 description = "Various BM25 algorithms for document ranking"
@@ -3643,4 +3657,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "621648eb2e80f379cea17376d3c9cb5ae0a6f196ac3a4a5a57cf406d2cb6e58e"
+content-hash = "39c46bbf3e3cdc5fcdb75d53e928e2b3e77adbd196c5d286700c785200be6fd8"

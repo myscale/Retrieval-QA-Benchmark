@@ -1,0 +1,7 @@
+type: MyScale
+args:
+  msc_host: "10.1.2.118"
+  msc_port: 8123
+  msc_user: admin
+  msc_pass: moqi.ai
+  table_name: default.Wikipedia
