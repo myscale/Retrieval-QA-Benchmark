@@ -10,11 +10,12 @@ from retrieval_qa_benchmark.utils.profiler import PROFILER
 from .base import BaseSearcher, Entry
 
 
-def is_sql_safe(word: str):
-    for c in [')', '\'', ',', '(']:
+def is_sql_safe(word: str) -> bool:
+    for c in [")", "'", ",", "("]:
         if c in word:
             return False
     return True
+
 
 class MyScaleSearcher(BaseSearcher):
     """"""
@@ -61,7 +62,9 @@ class MyScaleSearcher(BaseSearcher):
             """
         if self.two_staged:
             self.ke_model.extract_keywords_from_text(query_list[0])
-            terms = [w for w in self.ke_model.get_ranked_phrases() if is_sql_safe(w)][: self.kw_topk]
+            terms = [w for w in self.ke_model.get_ranked_phrases() if is_sql_safe(w)][
+                : self.kw_topk
+            ]
             terms_pattern = [f"(?i){x}" for x in terms]
             query = (
                 f"SELECT tempt.text AS text, tempt.title AS title, "
