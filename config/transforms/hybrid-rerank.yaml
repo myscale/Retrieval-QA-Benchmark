@@ -1,0 +1,6 @@
+type: RRFHybrid
+args: 
+  num_selected: 5
+  rank_dict:
+    previous: 30
+    bm25: 40

@@ -30,15 +30,15 @@ class Dummy_3(BaseTransform):
         return "dummy3" + data["question"]
 
 
-@pytest.mark.parametrize("num_base", [random.randint(20, 50) for _ in range(10)])
-def test_DAG_1(num_base: int) -> None:
-    import math
+@pytest.mark.parametrize("num_base", [random.randint(0, 100) for _ in range(10)])
+def test_seq_1(num_base: int) -> None:
     from os import path
 
+    num_base = 20
     config = yaml.safe_load(
         open(
             path.join(
-                path.dirname(path.realpath(__file__)), "assets/test_transform_DAG.yaml"
+                path.dirname(path.realpath(__file__)), "assets/test_transform_seq.yaml"
             )
         )
     )
@@ -50,12 +50,9 @@ def test_DAG_1(num_base: int) -> None:
             id="test1", question="*" * num_base, answer="answer for test 1", type="open"
         )
     )
-    cnt = math.ceil((100 - num_base) / 6)
-    assert cnt * 6 + 12 - 6 * (cnt % 2) + num_base == len(
-        d.question
-    ), "Execution count mismatched"
-    assert d.question[:6] == "dummy3", "Final state should be dummy"
+    assert chain.chain["0"].children == (chain.chain["1"], chain.chain["1"])
+    assert d.question[:18] == "dummy3dummy2dummy1"
 
 
 if __name__ == "__main__":
-    test_DAG_1(20)
+    test_seq_1(20)

@@ -1,6 +1,6 @@
-name: "gpt35"
+type: "gpt35"
 args:
-  model: "gpt-3.5-turbo"
+  name: "gpt-3.5-turbo"
   api_base: "http://10.1.3.28:8990/v1"
   api_key: "sk-some-super-secret-key-you-will-never-know"
   system_prompt: ""

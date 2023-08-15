@@ -14,7 +14,7 @@ class HotpotQATransform(BaseTransform):
         return None
 
     def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
-        return data['question']
+        return data["question"]
 
 
 @REGISTRY.register_dataset("hotpot_qa")

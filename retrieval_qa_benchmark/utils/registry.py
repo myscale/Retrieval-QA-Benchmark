@@ -2,11 +2,15 @@ from typing import Any, Callable, Dict
 
 from pydantic import BaseModel, Extra
 
+from retrieval_qa_benchmark.utils.profiler import PROFILER
+
 
 class Registry(BaseModel):
+    """ """
+
     Datasets: Dict[str, Any] = {}
     Transforms: Dict[str, Any] = {}
-    Models: Dict[str, Any] = {}
+    LLMs: Dict[str, Any] = {}
     Evaluators: Dict[str, Any] = {}
 
     class Config:
@@ -15,13 +19,15 @@ class Registry(BaseModel):
     def register_dataset(self, name: str) -> Callable:
         def decorator(f: Callable) -> Callable:
             self.Datasets[name] = f
+            f = PROFILER.profile_dataset(name)(f)
             return f
 
         return decorator
 
     def register_model(self, name: str) -> Callable:
         def decorator(f: Callable) -> Callable:
-            self.Models[name] = f
+            self.LLMs[name] = f
+            f = PROFILER.profile_model(name)(f)
             return f
 
         return decorator
@@ -36,6 +42,7 @@ class Registry(BaseModel):
     def register_transform(self, name: str) -> Callable:
         def decorator(f: Callable) -> Callable:
             self.Transforms[name] = f
+            f = PROFILER.profile_transform(name)(f)
             return f
 
         return decorator
