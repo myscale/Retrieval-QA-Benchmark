@@ -17,10 +17,7 @@ class WikiHopTransform(BaseTransform):
 
     def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
         question = data[self.qkey]
-        choices = "\n".join(
-            [f"{chr(65+i)}. {v}." for i, v in enumerate(data[self.ckey])]
-        )
-        return f"{question}\n{choices}"
+        return question
 
     def transform_type(self, data: Dict[str, Any], **params: Any) -> str:
         return "MCSA"

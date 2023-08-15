@@ -1,0 +1,3 @@
+type: Faiss
+args: 
+  num_selected: 100

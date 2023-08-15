@@ -5,9 +5,6 @@ from typing import Any, List
 from pydantic import BaseModel, Extra
 
 from retrieval_qa_benchmark.schema.datatypes import QARecord
-from retrieval_qa_benchmark.utils.profiler import PROFILER
-
-# profiler: Optional[List[BaseProfiler]] = None
 
 
 class BaseDataset(BaseModel):
@@ -23,7 +20,6 @@ class BaseDataset(BaseModel):
     def build(cls, *args: Any, **kwargs: Any) -> BaseDataset:
         raise NotImplementedError("Please implement a `.build` function")
 
-    @PROFILER.profile_function("BaseDataset.__getitem__")
     def __getitem__(self, index: int) -> QARecord:
         return self.eval_set[index]
 
