@@ -32,7 +32,7 @@ class ElSearchBM25Searcher(PluginVectorSearcher):
         score_list = []
         for i in range(len(query_list)):
             query = query_list[i]
-            query_pp = text_preprocess(query)
+            query_pp = ' '.join(text_preprocess(query))
             query_ = {"match": {"context": query_pp}}
             result = es.search(index="wiki-index", query=query_, size=num_selected)
             para_ids = [int(item["_id"]) for item in result["hits"]["hits"]]

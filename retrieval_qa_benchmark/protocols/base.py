@@ -85,12 +85,14 @@ class BaseEvaluator(BaseModel):
                 logger.error(f"Failed to evaluate record {str(d)}")
                 raise e
         acc = 100 * cnt / len(self.dataset)
+        avg_nt = sum([r.prompt_tokens + r.completion_tokens for r in result]) / len(result)
         logger.info(
             f"Evaluation finished! Executed Evaluator:{type(self)} on "
             f"Dataset:{self.dataset.name} with Model:{self.llm.name}. "
             f"Accuracy: {acc:.2f}%"
+            f"Average number of tokens: {avg_nt:.2f}"
         )
         if self.out_file:
             with open(self.out_file, "w") as f:
                 f.write("\n".join([r.model_dump_json() for r in result]))
-        return acc, result
+        return acc, avg_nt, result

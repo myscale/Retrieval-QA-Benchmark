@@ -39,17 +39,21 @@ class RemoteLLM(BaseLLM):
         self,
         text: str,
     ) -> BaseLLMOutput:
-        completion = openai.Completion.create(
-            model=self.name,
-            prompt="\n".join([self.system_prompt, text]),
-            **self.run_args,
-        )
-
-        return BaseLLMOutput(
-            generated=completion.choices[0].text,
-            prompt_tokens=completion.usage.prompt_tokens,
-            completion_tokens=completion.usage.completion_tokens,
-        )
+        while True:
+            try:
+                completion = openai.Completion.create(
+                    model=self.name,
+                    prompt="\n".join([self.system_prompt, text]),
+                    **self.run_args,
+                )
+                return BaseLLMOutput(
+                    generated=completion.choices[0].text,
+                    prompt_tokens=completion.usage.prompt_tokens,
+                    completion_tokens=completion.usage.completion_tokens,
+                )
+            except openai.error.ServiceUnavailableError as e:
+                print('ServiceUnavailableError', e)
+                continue
 
 
 @REGISTRY.register_model("gpt35")
@@ -80,16 +84,21 @@ class ChatGPT(GPT):
         self,
         text: str = "",
     ) -> BaseLLMOutput:
-        completion = openai.ChatCompletion.create(
-            model=self.name,
-            messages=[
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": text},
-            ],
-            **self.run_args,
-        )
-        return BaseLLMOutput(
-            generated=completion.choices[0].message.content,
-            prompt_tokens=completion.usage.prompt_tokens,
-            completion_tokens=completion.usage.completion_tokens,
-        )
+        while True:
+            try:
+                completion = openai.ChatCompletion.create(
+                    model=self.name,
+                    messages=[
+                        {"role": "system", "content": self.system_prompt},
+                        {"role": "user", "content": text},
+                    ],
+                    **self.run_args,
+                )
+                return BaseLLMOutput(
+                    generated=completion.choices[0].message.content,
+                    prompt_tokens=completion.usage.prompt_tokens,
+                    completion_tokens=completion.usage.completion_tokens,
+                )
+            except openai.error.ServiceUnavailableError as e:
+                print('ServiceUnavailableError', e)
+                continue

@@ -124,6 +124,31 @@ class RerankSearcher(BaseSearcher):
             .values.reshape(-1)
         )
         return rank, scores
+    
+    def el_bm25(
+        self, keywords: List[str], entries: List[Entry]
+    ) -> Tuple[Union[List[Entry], List[List[Entry]]], List[float]]:
+        from elasticsearch import Elasticsearch
+        ELASTIC_PASSWORD = 'kn_bYZnd6G8U03iQ1Omw'
+        es = Elasticsearch(
+            hosts = "http://10.1.3.28:9200",
+            basic_auth=('elastic', ELASTIC_PASSWORD)
+        )
+        query_pp = ' '.join(keywords)
+        query_ = {"match": {"context": query_pp}}
+        result = es.search(index='wiki-index', query=query_)
+        scores = []
+        for entry in entries:
+            entry_id = entry.paragraph_id
+            for item in result['hits']['hits']:
+                if int(item['_id']) == entry_id:
+                    scores.append(float(item['_score']))
+        rank = (
+            pd.DataFrame(scores)
+            .rank(ascending=False, method="average")
+            .values.reshape(-1)
+        )
+        return rank, scores
 
     def rank_result(
         self,
@@ -157,6 +182,9 @@ class RerankSearcher(BaseSearcher):
             elif rank_name == "colbert":
                 rank_col, score_col = self.rank_colbert(question, entries)
                 db_names.extend(["rank_col", "score_col"])
+            elif rank_name == "el_bm25":
+                rank_el_bm25, score_el_bm25 = self.el_bm25(keywords, entries)
+                db_names.extend(["rank_el_bm25", "score_el_bm25"])
             else:
                 raise ValueError(f"rank_name {rank_name} is not supported")
         db_names.extend(["title", "para"])

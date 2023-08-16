@@ -162,6 +162,7 @@ cython_debug/
 
 .ruff_cache
 *.jsonl
+*.parquet
 
 results/
 config/exps*/

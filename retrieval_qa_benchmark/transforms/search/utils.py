@@ -39,9 +39,9 @@ def text_preprocess(text: str) -> List[str]:
             res.append(lemmatizer.lemmatize(word, pos=wordnet_pos))
         return res
 
-    text = punctuation_filter(text)
-    stop_words = stopwords.words("english")
+    text = punctuation_filter(text).lower()
     res = lemmatize_sentence(text)
-    words = [word.lower() for word in res if word not in stop_words and len(word) > 1]
+    stop_words = stopwords.words("english")
+    words = [word for word in res if word not in stop_words]
 
     return words
