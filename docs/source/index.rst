@@ -6,31 +6,15 @@
 Welcome to retrieval_qa_benchmark's documentation!
 ==================================================
 
+Some text here
 
-LLM Models
-----------
+.. toctree::
+   :maxdepth: 2
 
-.. automodule:: retrieval_qa_benchmark.models
-   :members:
+   Home <self>
+   write-conf
+   api
 
-Transforms
-----------
-
-
-.. automodule:: retrieval_qa_benchmark.transforms
-   :members:
-
-Evaluation Protocols
---------------------
-
-.. automodule:: retrieval_qa_benchmark.protocols
-   :members:
-
-Schema
-------
-
-.. automodule:: retrieval_qa_benchmark.schema
-   :members:
 
 Indices and tables
 ==================
