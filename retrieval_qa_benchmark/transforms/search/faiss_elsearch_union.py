@@ -1,5 +1,5 @@
 import os
-from typing import Any, List, Optional, Tuple, Sequence
+from typing import Any, List, Optional, Tuple, Sequence, Callable
 
 import faiss
 import numpy as np
@@ -22,6 +22,7 @@ class FaissElSearchBM25UnionSearcher(PluginVectorSearcher):
     el_auth: Tuple[str, str]
     dataset_name: Sequence[str] = ["Cohere/wikipedia-22-12-en-embeddings"]
     dataset_split: str = "train"
+    text_preprocess: Callable = text_preprocess
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -70,7 +71,7 @@ class FaissElSearchBM25UnionSearcher(PluginVectorSearcher):
         score_list = []
         for i in range(len(query_list)):
             query = query_list[i]
-            query_pp = ' '.join(text_preprocess(query))
+            query_pp = ' '.join(self.text_preprocess(query))
             query_ = {"match": {"context": query_pp}}
             result = es.search(index="wiki-index", query=query_, size=num_selected)
             para_ids = [int(item["_id"]) for item in result["hits"]["hits"]]
