@@ -4,6 +4,8 @@ from retrieval_qa_benchmark.schema.transform import BaseTransform
 from retrieval_qa_benchmark.transforms.search import (
     ElSearchBM25Searcher,
     FaissSearcher,
+    FaissElSearchBM25UnionSearcher,
+    FaissElSearchBM25HybridSearcher,
     MyScaleSearcher,
 )
 from retrieval_qa_benchmark.transforms.search.base import BaseSearcher
@@ -70,6 +72,60 @@ class ContextWithElasticBM25(BaseContextTransform):
             dataset_split="train",
         )
 
+
+@REGISTRY.register_transform("Faiss_ElasticBM25_Union")
+class ContextWithFaissElasticUnionBM25(BaseContextTransform):
+    nprobe: int = 128
+    index_path: str = (
+        "/mnt/workspaces/yongqij/evals/data/indexes/Cohere_mpnet/IVFSQ_L2.index"
+    )
+    embedding_name: str = "paraphrase-multilingual-mpnet-base-v2"
+    dataset_name: Sequence[str] = ["Cohere/wikipedia-22-12-en-embeddings"]
+    el_host: str
+    el_auth: Tuple[str, str]
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._searcher = FaissElSearchBM25UnionSearcher(
+            model_name=self.embedding_name,
+            index_path=self.index_path,
+            template=self.context_template,
+            nprobe=self.nprobe,
+            dataset_name=self.dataset_name,
+            dataset_split="train",
+            el_host=self.el_host,
+            el_auth=self.el_auth,
+        )
+
+
+@REGISTRY.register_transform("Faiss_ElasticBM25_Hybrid")
+class ContextWithFaissElasticHybirdBM25(BaseContextTransform):
+    nprobe: int = 128
+    index_path: str = (
+        "/mnt/workspaces/yongqij/evals/data/indexes/Cohere_mpnet/IVFSQ_L2.index"
+    )
+    embedding_name: str = "paraphrase-multilingual-mpnet-base-v2"
+    dataset_name: Sequence[str] = ["Cohere/wikipedia-22-12-en-embeddings"]
+    el_host: str
+    el_auth: Tuple[str, str]
+    num_filtered: int
+    is_raw_rank: bool
+    
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._searcher = FaissElSearchBM25HybridSearcher(
+            model_name=self.embedding_name,
+            index_path=self.index_path,
+            template=self.context_template,
+            nprobe=self.nprobe,
+            dataset_name=self.dataset_name,
+            dataset_split="train",
+            el_host=self.el_host,
+            el_auth=self.el_auth,
+            num_filtered=self.num_filtered,
+            is_raw_rank=self.is_raw_rank,
+        )
+        
 
 @REGISTRY.register_transform("MyScale")
 class ContextWithMyScale(BaseContextTransform):

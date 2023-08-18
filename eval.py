@@ -20,28 +20,11 @@ p.add_argument('--config', '-c', default=f'mmlu-llama2-remote-retrieval-myscale'
 
 args = p.parse_args()
 yaml_file = f'config/{args.config}.yaml'
-config = load(open("config/mmlu-llama2-remote-retrieval-myscale.yaml"))
+config = load(open(yaml_file))
 
-try:
-    subset = 'mmlu_' + config['evaluator']['dataset']['args']['subset']
-except Exception as e:
-    subset = 'mmlu_prehistory'
-outdir = f'results/{subset}'
+outdir = 'results/'
 
-try:
-    args1 = config['evaluator']['transform_chain']['chain'][0]['args']
-    args2 = config['evaluator']['transform_chain']['chain'][1]['args']
-    rank_list = [str(args2['num_selected']), 'f' +str(args1['num_selected'])]
-    for k,v in args2['rank_dict'].items():
-        rank_list.append(k[0]+str(v))
-except Exception as e:
-    rank_list = ['0']
-rank_list.append('llama')
-output_name = '_'.join(rank_list)
-outfile_result = path.join(outdir, output_name + ".jsonl")
-outfile_profile = path.join(outdir, output_name + ".txt")
-
-print('')
+outfile_result = path.join(outdir, args.config + ".jsonl")
 print('output_file:', outfile_result)
 
 if os.path.exists(outfile_result):
@@ -56,6 +39,3 @@ if not path.exists(outdir):
     
 with open(outfile_result, "w") as f:
     f.write("\n".join([f"Accuracy: {matched[0]:.2f}%", f"Average tokens: {matched[1]:.2f}"] + [r.model_dump_json() for r in matched[2]]))
-    
-with open(outfile_profile, 'w') as f:
-    f.write(str(PROFILER))

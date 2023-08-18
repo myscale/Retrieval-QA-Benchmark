@@ -1,0 +1,9 @@
+type: Faiss_ElasticBM25_Hybrid
+args: 
+  num_selected: 100
+  el_host: "http://10.1.3.28:9200"
+  el_auth: 
+    - 'elastic'
+    - 'kn_bYZnd6G8U03iQ1Omw'
+  num_filtered: 10000
+  is_raw_rank: true

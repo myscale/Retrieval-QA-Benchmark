@@ -155,7 +155,7 @@ class RerankSearcher(BaseSearcher):
         question: str,
         entries: List[Entry],
     ) -> pd.DataFrame:
-        rank_emb = np.array(range(1, len(entries) + 1), dtype=np.int32)  # noqa: F841
+        rank_pre = np.array(range(1, len(entries) + 1), dtype=np.int32)  # noqa: F841
         para_id = []
         title = []
         para = []
@@ -172,10 +172,10 @@ class RerankSearcher(BaseSearcher):
                 text_preprocess(_title) + text_preprocess(_para)
                 for _title, _para in zip(title, para)
             ]
-        db_names = ["para_id", "rank_emb"]
+        db_names = ["para_id", "rank_pre"]
         for rank_name in self.rank_dict.keys():
             if rank_name == "previous":
-                db_names.append("rank_emb")
+                db_names.append("rank_pre")
             elif rank_name == "bm25":
                 rank_bm25, score_bm25 = self.bm25(keywords, words_para_list)
                 db_names.extend(["rank_bm25", "score_bm25"])
@@ -270,7 +270,7 @@ class RerankSearcher(BaseSearcher):
         return _entry_list
 
     def rrf_result(self, result_db: Dict[str, Any]) -> Dict[str, Any]:
-        _dict = {"previous": "rank_emb", "bm25": "rank_bm25", "colbert": "rank_col"}
+        _dict = {"previous": "rank_pre", "bm25": "rank_bm25", "colbert": "rank_col"}
         ranks = []
         rrf_coefficients = []
         for rank_name in self.rank_dict.keys():
