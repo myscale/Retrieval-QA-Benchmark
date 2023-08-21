@@ -53,3 +53,15 @@ class BaseDataset(BaseModel):
         :meta public:
         """
         return len(self.eval_set)
+    
+        
+    def __add__(self, other: BaseDataset) -> BaseDataset:
+        """Add two datasets
+
+        :param other: _description_
+        :type other: _type_
+        """
+        self.name += f"&{other.name}"
+        self.eval_set += other.eval_set
+        return self
+

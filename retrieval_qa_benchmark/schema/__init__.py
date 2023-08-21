@@ -4,7 +4,7 @@ from retrieval_qa_benchmark.schema.datatypes import (
     QARecord,
 )
 from retrieval_qa_benchmark.schema.model import BaseLLM, BaseLLMOutput
-from retrieval_qa_benchmark.schema.transform import BaseTransform, TransformChain
+from retrieval_qa_benchmark.schema.transform import BaseTransform, TransformGraph
 
 __all__ = [
     "QARecord",
@@ -13,5 +13,5 @@ __all__ = [
     "BaseLLMOutput",
     "BaseDataset",
     "BaseTransform",
-    "TransformChain",
+    "TransformGraph",
 ]

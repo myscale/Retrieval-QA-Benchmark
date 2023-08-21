@@ -1,7 +1,8 @@
+.. _api:
+
 API
 ===
 
-.. _api:
 
 Searchers
 ----------

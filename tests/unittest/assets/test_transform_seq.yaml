@@ -2,14 +2,5 @@ evaluator:
   transform_chain:
     chain:
       - type: dummy1
-        children: 
-          - t2
-          - t3
       - type: dummy2
-        children: 
-          - null
-          - t1
       - type: dummy3
-        children: 
-          - null
-          - null

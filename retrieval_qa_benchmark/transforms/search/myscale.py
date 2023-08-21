@@ -78,7 +78,7 @@ class MyScaleSearcher(BaseSearcher):
                 f"tempt.text], ' '), '(?i)({'|'.join(terms)})')) "
                 f"AS distance2, d DESC LIMIT {num_selected}"
             )
-        result = self.retrieve(query)
+        result = self.retrieve(self.client, query)
         entry_list = [
             [
                 Entry(rank=i, paragraph_id=i, title=r["title"], paragraph=r["text"])
@@ -89,11 +89,5 @@ class MyScaleSearcher(BaseSearcher):
         return D_list, entry_list
 
     @PROFILER.profile_function("database.MyScaleSearcher.retrieve.profile")
-    def retrieve(self, query: str) -> List[Any]:
-        client = get_client(
-            host=self.host,
-            port=self.port,
-            username=self.username,
-            password=self.password,
-        )
-        return [r for r in client.query(query).named_results()]
+    def retrieve(self, client: Any, query: str) -> List[Any]:
+        return [r for r in self.client.query(query).named_results()]

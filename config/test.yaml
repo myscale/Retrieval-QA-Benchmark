@@ -1,0 +1,23 @@
+evaluator: 
+  outfile: mmlu-llama2-remote-retrieval-base.jsonl
+  dataset:
+    - type: mmlu
+      args:
+        subset: astronomy
+    - type: mmlu
+      args:
+        subset: clinical_knowledge
+    - type: mmlu
+      args:
+        subset: college_medicine
+    - type: mmlu
+      args:
+        subset: global_facts
+    - type: mmlu
+      args:
+        subset: prehistory
+  model: !include models/remote-llama2-13b.yaml
+  transform_chain: 
+    chain: 
+      - !include transforms/myscale.yaml
+  

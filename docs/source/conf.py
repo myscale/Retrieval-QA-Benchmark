@@ -30,6 +30,8 @@ author = "Fangrui Liu"
 # ones.
 extensions = [
     "sphinxcontrib.autodoc_pydantic",
+    "sphinx.ext.graphviz",
+    # "sphinxcontrib.versioning.sphinx",
     # 'sphinx.ext.autodoc'
 ]
 autodoc_pydantic_model_show_json = False

@@ -11,12 +11,12 @@ from retrieval_qa_benchmark.schema import (
     BaseLLM,
     QAPrediction,
     QARecord,
-    TransformChain,
+    TransformGraph,
 )
 from retrieval_qa_benchmark.utils.factory import (
     DatasetFactory,
     ModelFactory,
-    TransformChainFactory,
+    TransformGraphFactory,
 )
 from retrieval_qa_benchmark.utils.profiler import PROFILER
 
@@ -26,7 +26,7 @@ class BaseEvaluator(BaseModel):
 
     dataset: BaseDataset
     llm: BaseLLM
-    transform: TransformChain
+    transform: TransformGraph
     matcher: Callable[[str, QARecord], bool] = lambda x, y: x == y.answer  # noqa: E731
     out_file: Optional[str] = None
 
@@ -36,13 +36,18 @@ class BaseEvaluator(BaseModel):
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> BaseEvaluator:
         config = config["evaluator"]
-        dataset = DatasetFactory.from_config(config["dataset"]).build()
+        if type(config['dataset']) is list:
+            dataset = DatasetFactory.from_config(config["dataset"][0]).build()
+            for c in config['dataset'][1:]:
+                dataset += DatasetFactory.from_config(c).build()
+        else:
+            dataset = DatasetFactory.from_config(config["dataset"]).build()
         if "transform_chain" in config:
-            transform = TransformChainFactory(
+            transform = TransformGraphFactory(
                 chain_config=config["transform_chain"]
             ).build()
         else:
-            transform = TransformChainFactory(chain_config={}).build()
+            transform = TransformGraphFactory(chain_config={}).build()
         model = ModelFactory.from_config(config["model"]).build()
         out_file = config["out_file"] if "out_file" in config else None
         return cls(dataset=dataset, transform=transform, llm=model, out_file=out_file)

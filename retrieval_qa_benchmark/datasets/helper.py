@@ -5,13 +5,13 @@ from loguru import logger
 from tqdm import tqdm
 
 from retrieval_qa_benchmark.schema import QARecord
-from retrieval_qa_benchmark.schema.transform import BaseTransform, TransformChain
+from retrieval_qa_benchmark.schema.transform import BaseTransform, TransformGraph
 
 
 def build_hfdataset_internal(
     name: Union[str, Sequence[str]],
     eval_split: str = "validation",
-    transform: Union[BaseTransform, TransformChain] = BaseTransform(),
+    transform: Union[BaseTransform, TransformGraph] = BaseTransform(),
     **kwargs: Any,
 ) -> Tuple[str, List[QARecord]]:
     if type(name) is str:

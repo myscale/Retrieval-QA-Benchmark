@@ -8,7 +8,7 @@ from retrieval_qa_benchmark.schema import (
     BaseDataset,
     BaseLLM,
     BaseTransform,
-    TransformChain,
+    TransformGraph,
 )
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
@@ -59,12 +59,11 @@ class TransformFactory(BaseFactory):
         return REGISTRY.Transforms[self.type](**self.args)
 
 
-class TransformChainFactory(BaseModel):
-    """ """
+class TransformGraphFactory(BaseModel):
 
     chain_config: Dict[str, Any] = {}
 
-    def build(self) -> TransformChain:
+    def build(self) -> TransformGraph:
         if "chain" in self.chain_config and len(self.chain_config["chain"]) > 0:
             chain_config = self.chain_config["chain"]
             if type(chain_config) in [list, tuple]:
@@ -75,11 +74,10 @@ class TransformChainFactory(BaseModel):
                 }
                 for i in range(len(chain_config)):
                     if i > 0:
-                        transforms[str(i - 1)].children = (
+                        transforms[str(i - 1)].next = [
                             transforms[str(i)],
                             transforms[str(i)],
-                        )
-                print(transforms)
+                        ]
             else:
                 entry_id = self.chain_config["entry_id"]
                 transforms = {
@@ -87,12 +85,12 @@ class TransformChainFactory(BaseModel):
                     for k, c in chain_config.items()
                 }
                 for k, c in chain_config.items():
-                    transforms[k].children = (
-                        transforms[c["children"][0]]
-                        if c["children"][0] is not None
+                    transforms[k].next = (
+                        transforms[c["next"][0]]
+                        if c["next"][0] is not None
                         else None,
-                        transforms[c["children"][1]]
-                        if c["children"][1] is not None
+                        transforms[c["next"][1]]
+                        if c["next"][1] is not None
                         else None,
                     )
             assert (
@@ -104,7 +102,7 @@ class TransformChainFactory(BaseModel):
         else:
             entry_id = ""
             transforms = {}
-        return TransformChain(entry_id=entry_id, chain=transforms)
+        return TransformGraph(entry_id=entry_id, chain=transforms)
 
 
 class ModelFactory(BaseFactory):
