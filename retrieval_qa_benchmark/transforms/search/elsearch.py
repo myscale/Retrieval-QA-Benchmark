@@ -6,11 +6,17 @@ from .base import Entry, PluginVectorSearcher
 from .utils import text_preprocess
 
 
-class ElSearchBM25Searcher(PluginVectorSearcher):
+class ElSearchSearcher(PluginVectorSearcher):
+    """Elastic searcher"""
+
     el_host: str
+    """hostname to elastic search backend"""
     el_auth: Tuple[str, str]
+    """auth tuple for elastic search"""
     dataset_name: Sequence[str] = ["Cohere/wikipedia-22-12-en-embeddings"]
+    """dataset name for plugin dataset"""
     dataset_split: str = "train"
+    """split for that dataset"""
 
     def search(
         self,
@@ -25,6 +31,15 @@ class ElSearchBM25Searcher(PluginVectorSearcher):
     def bm25_filter(
         self, query_list: List[str], num_selected: int
     ) -> Tuple[List[List[float]], List[List[Entry]]]:
+        """BM25 search
+
+        :param query_list: list of queries
+        :type query_list: List[str]
+        :param num_selected: number of returned context
+        :type num_selected: int
+        :return: distances and entries
+        :rtype: Tuple[List[List[float]], List[List[Entry]]]
+        """
         from elasticsearch import Elasticsearch
 
         es = Elasticsearch(hosts=self.el_host, basic_auth=self.el_auth)

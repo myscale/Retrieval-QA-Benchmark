@@ -1,4 +1,4 @@
-from retrieval_qa_benchmark.transforms.base import (
+from retrieval_qa_benchmark.transforms.singlestaged import (
     ContextWithElasticBM25,
     ContextWithFaiss,
 )

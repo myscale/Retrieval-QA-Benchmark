@@ -9,7 +9,7 @@ from retrieval_qa_benchmark.schema.datatypes import QARecord
 
 class BaseDataset(BaseModel):
     """Dataset's Baseclass
-    
+
     Dataset should always output :class:`QARecord`
     with ``__getitem__`` method
     """
@@ -53,8 +53,7 @@ class BaseDataset(BaseModel):
         :meta public:
         """
         return len(self.eval_set)
-    
-        
+
     def __add__(self, other: BaseDataset) -> BaseDataset:
         """Add two datasets
 
@@ -64,4 +63,3 @@ class BaseDataset(BaseModel):
         self.name += f"&{other.name}"
         self.eval_set += other.eval_set
         return self
-

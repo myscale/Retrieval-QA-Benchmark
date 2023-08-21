@@ -36,18 +36,16 @@ class BaseEvaluator(BaseModel):
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> BaseEvaluator:
         config = config["evaluator"]
-        if type(config['dataset']) is list:
+        if type(config["dataset"]) is list:
             dataset = DatasetFactory.from_config(config["dataset"][0]).build()
-            for c in config['dataset'][1:]:
+            for c in config["dataset"][1:]:
                 dataset += DatasetFactory.from_config(c).build()
         else:
             dataset = DatasetFactory.from_config(config["dataset"]).build()
-        if "transform_chain" in config:
-            transform = TransformGraphFactory(
-                chain_config=config["transform_chain"]
-            ).build()
+        if "transform" in config:
+            transform = TransformGraphFactory(nodes_config=config["transform"]).build()
         else:
-            transform = TransformGraphFactory(chain_config={}).build()
+            transform = TransformGraphFactory(nodes_config={}).build()
         model = ModelFactory.from_config(config["model"]).build()
         out_file = config["out_file"] if "out_file" in config else None
         return cls(dataset=dataset, transform=transform, llm=model, out_file=out_file)

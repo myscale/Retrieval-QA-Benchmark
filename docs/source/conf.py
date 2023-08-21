@@ -13,7 +13,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../"))
+# sys.path.insert(0, os.path.abspath("../../retrieval_qa_benchmark"))
 
 
 # -- Project information -----------------------------------------------------
@@ -29,8 +29,8 @@ author = "Fangrui Liu"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinxcontrib.autodoc_pydantic",
     "sphinx.ext.graphviz",
+    "sphinxcontrib.autodoc_pydantic",
     # "sphinxcontrib.versioning.sphinx",
     # 'sphinx.ext.autodoc'
 ]

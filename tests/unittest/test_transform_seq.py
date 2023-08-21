@@ -42,15 +42,13 @@ def test_seq_1(num_base: int) -> None:
             )
         )
     )
-    chain = TransformGraphFactory(
-        chain_config=config["evaluator"]["transform_chain"]
-    ).build()
-    d = chain(
+    graph = TransformGraphFactory(nodes_config=config["evaluator"]["transform"]).build()
+    d = graph(
         QARecord(
             id="test1", question="*" * num_base, answer="answer for test 1", type="open"
         )
     )
-    assert chain.chain["0"].next == (chain.chain["1"], chain.chain["1"])
+    assert graph.nodes["0"].children == (graph.nodes["1"], graph.nodes["1"])
     assert d.question[:18] == "dummy3dummy2dummy1"
 
 

@@ -60,39 +60,33 @@ class TransformFactory(BaseFactory):
 
 
 class TransformGraphFactory(BaseModel):
-
-    chain_config: Dict[str, Any] = {}
+    nodes_config: Dict[str, Any] = {}
 
     def build(self) -> TransformGraph:
-        if "chain" in self.chain_config and len(self.chain_config["chain"]) > 0:
-            chain_config = self.chain_config["chain"]
-            if type(chain_config) in [list, tuple]:
+        if "nodes" in self.nodes_config and len(self.nodes_config["nodes"]) > 0:
+            nodes_config = self.nodes_config["nodes"]
+            if type(nodes_config) in [list, tuple]:
                 entry_id = "0"
                 transforms = {
                     str(i): TransformFactory.from_config(c, id=str(i)).build()
-                    for i, c in enumerate(chain_config)
+                    for i, c in enumerate(nodes_config)
                 }
-                for i in range(len(chain_config)):
+                for i in range(len(nodes_config)):
                     if i > 0:
-                        transforms[str(i - 1)].next = [
+                        transforms[str(i - 1)].children = [
                             transforms[str(i)],
                             transforms[str(i)],
                         ]
             else:
-                entry_id = self.chain_config["entry_id"]
+                entry_id = self.nodes_config["entry_id"]
                 transforms = {
                     k: TransformFactory.from_config(c, id=k).build()
-                    for k, c in chain_config.items()
+                    for k, c in nodes_config.items()
                 }
-                for k, c in chain_config.items():
-                    transforms[k].next = (
-                        transforms[c["next"][0]]
-                        if c["next"][0] is not None
-                        else None,
-                        transforms[c["next"][1]]
-                        if c["next"][1] is not None
-                        else None,
-                    )
+                for k, c in nodes_config.items():
+                    transforms[k].children = [
+                        transforms[i] if i is not None else None for i in c["next"]
+                    ]
             assert (
                 entry_id != ""
             ), "Entry ID must not be empty for dictionary of transforms"
@@ -102,7 +96,7 @@ class TransformGraphFactory(BaseModel):
         else:
             entry_id = ""
             transforms = {}
-        return TransformGraph(entry_id=entry_id, chain=transforms)
+        return TransformGraph(entry_id=entry_id, nodes=transforms)
 
 
 class ModelFactory(BaseFactory):

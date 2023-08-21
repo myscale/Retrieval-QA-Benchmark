@@ -7,7 +7,6 @@ from typing import (
     List,
     Optional,
     Tuple,
-    Sequence,
     Union,
     cast,
     get_args,
@@ -68,12 +67,12 @@ class BaseTransform(BaseModel):
     and outputs a new :class:`QARecord`.
 
     ** Principle of design:
-    
+
     1. Make every transform as a minimal and atomic operation to :class:`QARecord`
     2. Only alter the fields it needs to change in a single :class:`BaseTransform`
     """
 
-    next: Sequence[Optional["BaseTransform"]] = [None, None]
+    children: List[Optional[BaseTransform]] = [None, None]
     """list of next status"""
 
     class Config:
@@ -110,14 +109,14 @@ class BaseTransform(BaseModel):
 
         :param current: Current transformed :class:`QARecord` as dictionary
         :type current: Dict[str, Any]
-        :return: the next state ID in :attribute:`BaseTransform.next`
+        :return: the next state ID in `BaseTransform.children`
         :rtype: int
         """
         return 1
 
     def __call__(
         self, data: Dict[str, Any]
-    ) -> Tuple[Optional["BaseTransform"], QARecord]:
+    ) -> Tuple[Optional[BaseTransform], QARecord]:
         """you can call :class:`BaseTransform` as functions
 
         :return: a transformed :class:`QARecord`
@@ -128,7 +127,7 @@ class BaseTransform(BaseModel):
 
     def chain(
         self, data: Union[QARecord, Dict[str, Any]]
-    ) -> Tuple[Optional["BaseTransform"], Dict[str, Any]]:
+    ) -> Tuple[Optional[BaseTransform], Dict[str, Any]]:
         """chainable function for :class:`TransformChain`
 
         :raises e: transform will raise exception once one of transform function fails.
@@ -144,33 +143,28 @@ class BaseTransform(BaseModel):
             except Exception as e:
                 logger.error(f"Transform function failed on key `{k}`")
                 raise e
-        return self.next[self.check_status(result)], result
+        return self.children[self.check_status(result)], result
 
 
 class TransformGraph(BaseModel):
     """Callable graph for :class:`BaseTransform`
-
-.. graphviz::
-   digraph foo {
-      "bar" -> "baz";
-   }
     """
 
     entry_id: str
-    chain: Dict[str, BaseTransform]
+    nodes: Dict[str, BaseTransform]
 
     @classmethod
     def build(
         cls,
-        chain: Dict[str, BaseTransform],
+        nodes: Dict[str, BaseTransform],
         entry_id: str = "0",
     ) -> "TransformGraph":
-        return cls(chain=chain, entry_id=entry_id)
+        return cls(nodes=nodes, entry_id=entry_id)
 
     @PROFILER.profile_function("transform.TransformChain.profile")
     def __call__(self, data: Dict[str, Any]) -> QARecord:
-        if len(self.chain) > 0:
-            ret: Optional["BaseTransform"] = self.chain[self.entry_id]
+        if len(self.nodes) > 0:
+            ret: Optional["BaseTransform"] = self.nodes[self.entry_id]
             while ret is not None:
                 ret, data = ret(data)  # type: ignore
                 if type(data) is QAPrediction:

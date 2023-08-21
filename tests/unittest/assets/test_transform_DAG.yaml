@@ -1,7 +1,7 @@
 evaluator:
-  transform_chain:
+  transform:
     entry_id: t1
-    chain:
+    nodes:
       t1:
         type: dummy1
         next: 

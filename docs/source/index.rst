@@ -9,11 +9,13 @@ Welcome to retrieval_qa_benchmark's documentation!
 Some text here
 
 .. toctree::
-   :maxdepth: 2
+  :maxdepth: 2
 
-   Home <self>
-   write-conf
-   api
+  Home <self>
+  write-conf
+  api
+
+
 
 
 Indices and tables
