@@ -164,5 +164,5 @@ cython_debug/
 *.jsonl
 *.parquet
 
-results/
 config/exps*/
+results*/
