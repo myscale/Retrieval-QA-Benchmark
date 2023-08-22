@@ -1,0 +1,19 @@
+evaluator:
+  transform:
+    entry_id: t1
+    nodes:
+      t1:
+        type: dummy1
+        next: 
+          - t2
+          - t3
+      t2:
+        type: dummy2
+        next: 
+          - null
+          - t1
+      t3:
+        type: dummy3
+        next: 
+          - null
+          - null

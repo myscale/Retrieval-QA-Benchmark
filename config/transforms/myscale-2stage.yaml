@@ -1,0 +1,10 @@
+type: MyScale
+args:
+  msc_host: "your myscale backend"
+  msc_port: 443
+  msc_user: your-username
+  msc_pass: your-password
+  table_name: default.Wikipedia
+  num_filtered: 100
+  two_staged: true
+  kw_topk: 10

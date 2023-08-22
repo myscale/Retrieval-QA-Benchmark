@@ -1,0 +1,4 @@
+type: Faiss
+args: 
+  num_selected: 100
+  index_path: "path-to-your-index"

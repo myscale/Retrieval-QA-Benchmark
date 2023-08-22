@@ -1,0 +1,6 @@
+evaluator:
+  transform:
+    nodes:
+      - type: dummy1
+      - type: dummy2
+      - type: dummy3
