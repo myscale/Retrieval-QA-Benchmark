@@ -15,11 +15,14 @@ class BaseLLMOutput(BaseModel):
 
 class BaseLLM(BaseModel):
     name: str
+    """name of the model, like `gpt-3.5-turbo` or `llama2-13b-chat`"""
     record_template: str = (
         "The following are multiple choice questions (with answers) with context:\n\n"
         "{context}Question: {question}\n{choices}Answer: "
     )
+    """template to convert :class:`QARecord` into string"""
     context_template: str = "Context:\n{context}\n\n"
+    """template to inject contexts"""
 
     @property
     def tokenizer_type(self) -> str:

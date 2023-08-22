@@ -1,0 +1,9 @@
+evaluator: 
+  type: mcsa
+  outfile: mmlu-hybrid.jsonl
+  dataset: !include datasets/mmlu.yaml
+  model: !include models/chatgpt35.yaml
+  transform:
+    nodes:
+      - !include transforms/myscale.yaml
+  

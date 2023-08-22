@@ -1,45 +1,41 @@
-API
-===
-
 .. _api:
 
-Searchers
-----------
-
-  .. autopydantic_model:: retrieval_qa_benchmark.transforms.search.FaissSearcher
-    :members:
-
-  .. autopydantic_model:: retrieval_qa_benchmark.transforms.search.RerankSearcher
-    :members:
-
-  .. autopydantic_model:: retrieval_qa_benchmark.transforms.search.ElSearchBM25Searcher
-    :members:
-
-  .. autopydantic_model:: retrieval_qa_benchmark.transforms.search.MyScaleSearcher
-    :members:
-
-Transforms
-----------
-
-   .. automodule:: retrieval_qa_benchmark.transforms
-      :members:
-
-LLM Models
-----------
-
-   .. automodule:: retrieval_qa_benchmark.models
-      :members:
+############################
+	API
+############################
 
 
+.. toctree::
+	:maxdepth: 2
 
-Evaluation Protocols
---------------------
+	api/1-api-transforms
 
-  .. automodule:: retrieval_qa_benchmark.protocols
-    :members:
 
-Schema
-------
+.. toctree::
+	:maxdepth: 2
 
-   .. automodule:: retrieval_qa_benchmark.schema
-      :members:
+	api/2-api-searchers
+
+
+.. toctree::
+	:maxdepth: 2
+
+	api/3-api-llms
+
+
+.. toctree::
+	:maxdepth: 2
+
+	api/4-api-evaluators
+	
+
+.. toctree::
+	:maxdepth: 2
+
+	api/5-api-schema
+
+
+.. toctree:: 
+	:maxdepth: 2
+
+	api/6-api-utils

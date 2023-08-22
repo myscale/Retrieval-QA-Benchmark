@@ -1,7 +1,7 @@
 type: MyScale
 args:
-  msc_host: "10.1.2.118"
-  msc_port: 8123
-  msc_user: admin
-  msc_pass: moqi.ai
+  msc_host: "your myscale backend"
+  msc_port: 443
+  msc_user: your-username
+  msc_pass: your-password
   table_name: default.Wikipedia

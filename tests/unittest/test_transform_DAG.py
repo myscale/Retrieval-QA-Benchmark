@@ -5,7 +5,7 @@ import pytest
 import yaml
 
 from retrieval_qa_benchmark.schema import BaseTransform, QARecord
-from retrieval_qa_benchmark.utils.factory import TransformChainFactory
+from retrieval_qa_benchmark.utils.factory import TransformGraphFactory
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
@@ -42,10 +42,8 @@ def test_DAG_1(num_base: int) -> None:
             )
         )
     )
-    chain = TransformChainFactory(
-        chain_config=config["evaluator"]["transform_chain"]
-    ).build()
-    d = chain(
+    graph = TransformGraphFactory(nodes_config=config["evaluator"]["transform"]).build()
+    d = graph(
         QARecord(
             id="test1", question="*" * num_base, answer="answer for test 1", type="open"
         )

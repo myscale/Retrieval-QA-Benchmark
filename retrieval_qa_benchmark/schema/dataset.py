@@ -9,7 +9,6 @@ from retrieval_qa_benchmark.schema.datatypes import QARecord
 
 class BaseDataset(BaseModel):
     """Dataset's Baseclass
-    
     Dataset should always output :class:`QARecord`
     with ``__getitem__`` method
     """
@@ -45,6 +44,10 @@ class BaseDataset(BaseModel):
         """
         return self.eval_set[index]
 
+    def iterator(self) -> Any:
+        for n in range(len(self)):
+            yield self[n]
+
     def __len__(self) -> int:
         """_summary_
 
@@ -53,3 +56,13 @@ class BaseDataset(BaseModel):
         :meta public:
         """
         return len(self.eval_set)
+
+    def __add__(self, other: BaseDataset) -> BaseDataset:
+        """Add two datasets
+
+        :param other: _description_
+        :type other: _type_
+        """
+        self.name += f"&{other.name}"
+        self.eval_set += other.eval_set
+        return self

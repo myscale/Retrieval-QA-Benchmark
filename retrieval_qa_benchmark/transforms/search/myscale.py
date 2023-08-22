@@ -18,17 +18,28 @@ def is_sql_safe(word: str) -> bool:
 
 
 class MyScaleSearcher(BaseSearcher):
-    """"""
+    """MyScale Searcher"""
 
     host: str
+    """hostname to MyScale backend"""
     port: int
-    model_name: str
+    """port to MyScale backend"""
+    embedding_name: str
+    """embedding model name"""
     username: str = "default"
+    """user name to connect MyScale"""
     password: str = ""
+    """password to connect MyScale"""
     table_name: str = "Wikipedia"
+    """table name to search on"""
     two_staged: bool = False
+    """If twostaged search (with keyword) is enabled"""
     num_filtered: int = 100
+    """number sample returned in first stage filter.
+    Does not matter if `two_staged` is False
+    """
     kw_topk: int = 10
+    """keyword extraction only extract ``kw_topk`` keywords"""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -40,7 +51,7 @@ class MyScaleSearcher(BaseSearcher):
             password=self.password,
         )
         logger.info("load mpnet model...")
-        self.model = SentenceTransformer(self.model_name)
+        self.model = SentenceTransformer(self.embedding_name)
         self.ke_model = Rake()
 
     @PROFILER.profile_function("database.MyScaleSearcher.search.profile")
@@ -90,10 +101,4 @@ class MyScaleSearcher(BaseSearcher):
 
     @PROFILER.profile_function("database.MyScaleSearcher.retrieve.profile")
     def retrieve(self, query: str) -> List[Any]:
-        client = get_client(
-            host=self.host,
-            port=self.port,
-            username=self.username,
-            password=self.password,
-        )
-        return [r for r in client.query(query).named_results()]
+        return [r for r in self.client.query(query).named_results()]

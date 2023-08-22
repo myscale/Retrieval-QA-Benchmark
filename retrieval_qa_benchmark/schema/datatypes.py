@@ -22,7 +22,7 @@ class QAPrediction(QARecord):
     prompt_tokens: int = 0
     completion_tokens: int = 0
     pred: str
-    matched: bool
+    matched: float
     profile_time: Optional[Dict[str, Union[int, float]]] = {}
     profile_count: Optional[Dict[str, int]] = {}
     profile_avg: Optional[Dict[str, float]] = {}

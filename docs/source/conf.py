@@ -10,10 +10,8 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
 
-sys.path.insert(0, os.path.abspath("../"))
+# sys.path.insert(0, os.path.abspath("../../retrieval_qa_benchmark"))
 
 
 # -- Project information -----------------------------------------------------
@@ -21,6 +19,7 @@ sys.path.insert(0, os.path.abspath("../"))
 project = "Retrieval QA Benchmark"
 copyright = "2023, fangruil@myscale.com"
 author = "Fangrui Liu"
+version = "0.0.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -29,11 +28,13 @@ author = "Fangrui Liu"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx.ext.graphviz",
     "sphinxcontrib.autodoc_pydantic",
     # 'sphinx.ext.autodoc'
 ]
 autodoc_pydantic_model_show_json = False
 autodoc_pydantic_model_show_config_summary = False
+graphviz_output_format = "svg"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

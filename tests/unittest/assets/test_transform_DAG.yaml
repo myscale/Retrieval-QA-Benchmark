@@ -1,19 +1,19 @@
 evaluator:
-  transform_chain:
+  transform:
     entry_id: t1
-    chain:
+    nodes:
       t1:
         type: dummy1
-        children: 
+        next: 
           - t2
           - t3
       t2:
         type: dummy2
-        children: 
+        next: 
           - null
           - t1
       t3:
         type: dummy3
-        children: 
+        next: 
           - null
           - null
