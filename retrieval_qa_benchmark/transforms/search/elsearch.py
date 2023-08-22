@@ -42,7 +42,10 @@ class ElSearchSearcher(PluginVectorSearcher):
         :rtype: Tuple[List[List[float]], List[List[Entry]]]
         """
         from elasticsearch import Elasticsearch
-
+        
+        assert self.el_host != "", "You must set elastic search host name to use it!"
+        assert self.el_auth[0] == "elastic" and self.el_auth[1] != "", \
+            "You should give valid password to use elastic search!"
         es = Elasticsearch(hosts=self.el_host, basic_auth=self.el_auth)
         para_id_list = []
         score_list = []

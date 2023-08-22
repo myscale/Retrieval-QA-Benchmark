@@ -18,7 +18,7 @@ class RemoteLLM(BaseLLM):
     def build(
         cls,
         name: str = "llama2-13b-chat",
-        api_base: str = os.getenv("OPENAI_API_BASE", "http://10.1.3.28:8990/v1"),
+        api_base: str = os.getenv("OPENAI_API_BASE", ""),
         api_key: str = os.getenv(
             "OPENAI_API_KEY", "sk-some-super-secret-key-you-will-never-know"
         ),

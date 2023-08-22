@@ -1,8 +1,0 @@
-evaluator: 
-  outfile: mmlu-llama2-remote-retrieval-base.jsonl
-  dataset: !include datasets/mmlu.yaml
-  model: !include models/remote-llama2-13b.yaml
-  transform_chain:
-    chain:
-      - !include transforms/myscale.yaml
-  

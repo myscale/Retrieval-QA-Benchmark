@@ -54,6 +54,8 @@ class RerankSearcher(BaseSearcher):
 
     rank_dict: Dict[str, int] = {"previous": 30, "bm25": 40}
     with_title: bool = True
+    el_host: str = ""
+    el_auth: Tuple[str, str] = ("", "")
 
     def __init__(
         self,
@@ -61,8 +63,13 @@ class RerankSearcher(BaseSearcher):
         **kwargs: Any,
     ):
         super().__init__(*args, **kwargs)
-        logger.info("load Colbert model...")
-        self.Colbert_init()
+        if "el_bm25" in self.rank_dict:
+            assert self.el_host != "", "You must set elastic search host name to use it!"
+            assert self.el_auth[0] == "elastic" and self.el_auth[1] != "", \
+                "You should give valid password to use elastic search!"
+        if "colbert" in self.rank_dict:
+            logger.info("load Colbert model...")
+            self.Colbert_init()
 
     def Colbert_init(self, num_gpu: int = 1) -> None:
         from multiprocessing import current_process
@@ -129,10 +136,9 @@ class RerankSearcher(BaseSearcher):
         self, keywords: List[str], entries: List[Entry]
     ) -> Tuple[Union[List[Entry], List[List[Entry]]], List[float]]:
         from elasticsearch import Elasticsearch
-        ELASTIC_PASSWORD = 'kn_bYZnd6G8U03iQ1Omw'
         es = Elasticsearch(
-            hosts = "http://10.1.3.28:9200",
-            basic_auth=('elastic', ELASTIC_PASSWORD)
+            hosts = self.el_host,
+            basic_auth=self.el_auth
         )
         query_pp = ' '.join(keywords)
         query_ = {"match": {"context": query_pp}}
