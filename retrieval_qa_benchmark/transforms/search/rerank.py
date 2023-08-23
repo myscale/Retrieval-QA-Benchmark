@@ -54,6 +54,8 @@ class RerankSearcher(BaseSearcher):
 
     rank_dict: Dict[str, int] = {"previous": 30, "bm25": 40}
     with_title: bool = True
+    el_host: str = ""
+    el_auth: Tuple[str, str] = ("", "")
 
     def __init__(
         self,
@@ -61,8 +63,13 @@ class RerankSearcher(BaseSearcher):
         **kwargs: Any,
     ):
         super().__init__(*args, **kwargs)
-        logger.info("load Colbert model...")
-        self.Colbert_init()
+        if "el_bm25" in self.rank_dict:
+            assert self.el_host != "", "You must set elastic search host name to use it!"
+            assert self.el_auth[0] == "elastic" and self.el_auth[1] != "", \
+                "You should give valid password to use elastic search!"
+        if "colbert" in self.rank_dict:
+            logger.info("load Colbert model...")
+            self.Colbert_init()
 
     def Colbert_init(self, num_gpu: int = 1) -> None:
         from multiprocessing import current_process
@@ -124,13 +131,37 @@ class RerankSearcher(BaseSearcher):
             .values.reshape(-1)
         )
         return rank, scores
+    
+    def el_bm25(
+        self, keywords: List[str], entries: List[Entry]
+    ) -> Tuple[Union[List[Entry], List[List[Entry]]], List[float]]:
+        from elasticsearch import Elasticsearch
+        es = Elasticsearch(
+            hosts = self.el_host,
+            basic_auth=self.el_auth
+        )
+        query_pp = ' '.join(keywords)
+        query_ = {"match": {"context": query_pp}}
+        result = es.search(index='wiki-index', query=query_)
+        scores = []
+        for entry in entries:
+            entry_id = entry.paragraph_id
+            for item in result['hits']['hits']:
+                if int(item['_id']) == entry_id:
+                    scores.append(float(item['_score']))
+        rank = (
+            pd.DataFrame(scores)
+            .rank(ascending=False, method="average")
+            .values.reshape(-1)
+        )
+        return rank, scores
 
     def rank_result(
         self,
         question: str,
         entries: List[Entry],
     ) -> pd.DataFrame:
-        rank_emb = np.array(range(1, len(entries) + 1), dtype=np.int32)  # noqa: F841
+        rank_pre = np.array(range(1, len(entries) + 1), dtype=np.int32)  # noqa: F841
         para_id = []
         title = []
         para = []
@@ -147,16 +178,19 @@ class RerankSearcher(BaseSearcher):
                 text_preprocess(_title) + text_preprocess(_para)
                 for _title, _para in zip(title, para)
             ]
-        db_names = ["para_id", "rank_emb"]
+        db_names = ["para_id", "rank_pre"]
         for rank_name in self.rank_dict.keys():
             if rank_name == "previous":
-                db_names.append("rank_emb")
+                db_names.append("rank_pre")
             elif rank_name == "bm25":
                 rank_bm25, score_bm25 = self.bm25(keywords, words_para_list)
                 db_names.extend(["rank_bm25", "score_bm25"])
             elif rank_name == "colbert":
                 rank_col, score_col = self.rank_colbert(question, entries)
                 db_names.extend(["rank_col", "score_col"])
+            elif rank_name == "el_bm25":
+                rank_el_bm25, score_el_bm25 = self.el_bm25(keywords, entries)
+                db_names.extend(["rank_el_bm25", "score_el_bm25"])
             else:
                 raise ValueError(f"rank_name {rank_name} is not supported")
         db_names.extend(["title", "para"])
@@ -242,7 +276,7 @@ class RerankSearcher(BaseSearcher):
         return _entry_list
 
     def rrf_result(self, result_db: Dict[str, Any]) -> Dict[str, Any]:
-        _dict = {"previous": "rank_emb", "bm25": "rank_bm25", "colbert": "rank_col"}
+        _dict = {"previous": "rank_pre", "bm25": "rank_bm25", "colbert": "rank_col"}
         ranks = []
         rrf_coefficients = []
         for rank_name in self.rank_dict.keys():

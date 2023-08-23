@@ -9,7 +9,6 @@ from retrieval_qa_benchmark.schema.datatypes import QARecord
 
 class BaseDataset(BaseModel):
     """Dataset's Baseclass
-
     Dataset should always output :class:`QARecord`
     with ``__getitem__`` method
     """

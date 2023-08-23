@@ -5,6 +5,7 @@ import pytest
 import yaml
 
 from retrieval_qa_benchmark.schema import BaseTransform, QARecord
+from retrieval_qa_benchmark.utils.factory import TransformChainFactory
 from retrieval_qa_benchmark.utils.factory import TransformGraphFactory
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 

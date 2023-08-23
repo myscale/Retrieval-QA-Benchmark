@@ -1,0 +1,7 @@
+evaluator: 
+  outfile: mmlu-llama2-remote-retrieval-base.jsonl
+  dataset: !include datasets/mmlu.yaml
+  model: !include models/chatgpt35.yaml
+  transform_chain:
+    chain: 
+      - !include transforms/faiss-bm25-hybrid.yaml

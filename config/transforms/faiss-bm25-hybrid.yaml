@@ -1,0 +1,9 @@
+type: Faiss_ElasticBM25_Hybrid
+args: 
+  num_selected: 5
+  el_host: "elastic-search backend"
+  el_auth: 
+    - 'elastic'
+    - 'some-keys'
+  num_filtered: 10000
+  is_raw_rank: true

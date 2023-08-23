@@ -1,4 +1,4 @@
-from typing import List, Optional, Sequence, Tuple
+from typing import List, Optional, Sequence, Tuple, Callable
 
 from loguru import logger
 
@@ -17,6 +17,7 @@ class ElSearchSearcher(PluginVectorSearcher):
     """dataset name for plugin dataset"""
     dataset_split: str = "train"
     """split for that dataset"""
+    text_preprocess: Callable = text_preprocess
 
     def search(
         self,
@@ -41,13 +42,16 @@ class ElSearchSearcher(PluginVectorSearcher):
         :rtype: Tuple[List[List[float]], List[List[Entry]]]
         """
         from elasticsearch import Elasticsearch
-
+        
+        assert self.el_host != "", "You must set elastic search host name to use it!"
+        assert self.el_auth[0] == "elastic" and self.el_auth[1] != "", \
+            "You should give valid password to use elastic search!"
         es = Elasticsearch(hosts=self.el_host, basic_auth=self.el_auth)
         para_id_list = []
         score_list = []
         for i in range(len(query_list)):
             query = query_list[i]
-            query_pp = text_preprocess(query)
+            query_pp = ' '.join(self.text_preprocess(query))
             query_ = {"match": {"context": query_pp}}
             result = es.search(index="wiki-index", query=query_, size=num_selected)
             para_ids = [int(item["_id"]) for item in result["hits"]["hits"]]

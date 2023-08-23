@@ -1,0 +1,7 @@
+type: Faiss_ElasticBM25_Union
+args: 
+  num_selected: 100
+  el_host: "elastic-search backend"
+  el_auth: 
+    - 'elastic'
+    - 'some-keys'
