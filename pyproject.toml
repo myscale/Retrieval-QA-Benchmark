@@ -30,7 +30,6 @@ sentence-transformers = "^2.2.2"
 zstd = "^1.5.5.1"
 openai = "^0.27.8"
 numpy = "^1.25.2"
-faiss-cpu = {version = "1.7.3", platform = "darwin"}
 nltk = "^3.8.1"
 rank-bm25 = "^0.2.2"
 torch = "^2.0.1"
@@ -40,6 +39,7 @@ parse = "^1.19.1"
 types-pyyaml = "^6.0.12.11"
 clickhouse-connect = "^0.6.8"
 rake-nltk = "^1.0.6"
+faiss-cpu = "^1.7.4"
 
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = "^2.0.1"
