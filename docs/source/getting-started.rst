@@ -25,6 +25,12 @@ Install from source
 
     cd Retrieval-QA-Benchmark && python3 -m pip3 install -e .
 
+.. note::
+    For users who does not GPUs, you need a CPU version of pytorch with
+    
+    .. code-block:: bash
+
+        pip install torch --index-url https://download.pytorch.org/whl/cpu --upgrade
 
 .. _YAML configuration:
 
