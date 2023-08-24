@@ -19,9 +19,7 @@ class ContextWithFaiss(BaseContextTransform):
     """
 
     nprobe: int = 128
-    index_path: str = (
-        "data/indexes/Cohere_mpnet/IVFSQ_L2.index"
-    )
+    index_path: str = "data/indexes/Cohere_mpnet/IVFSQ_L2.index"
     embedding_name: str = "paraphrase-multilingual-mpnet-base-v2"
     dataset_name: Sequence[str] = ["Cohere/wikipedia-22-12-en-embeddings"]
 

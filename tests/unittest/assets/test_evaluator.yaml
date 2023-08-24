@@ -1,4 +1,9 @@
 evaluator:
+  type: Dummy
+  dataset:
+    type: Dummy
+  model:
+    type: Dummy
   transform:
     entry_id: t1
     nodes:

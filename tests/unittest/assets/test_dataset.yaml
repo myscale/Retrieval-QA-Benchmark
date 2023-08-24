@@ -1,0 +1,4 @@
+evaluator:
+  dataset:
+    - type: Dummy
+    - type: Dummy
