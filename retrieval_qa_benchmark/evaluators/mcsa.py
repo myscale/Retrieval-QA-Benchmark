@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Dict, cast, Callable
+from typing import Callable
 
-from retrieval_qa_benchmark.schema import BaseEvaluator
-from retrieval_qa_benchmark.schema import QARecord
+from retrieval_qa_benchmark.schema import BaseEvaluator, QARecord
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 

@@ -11,7 +11,6 @@ from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 @REGISTRY.register_model("remote-llm")
 class RemoteLLM(BaseLLM):
-    run_args: Dict[str, Any] = {}
     system_prompt: str = "You are a helpful assistant."
 
     @classmethod

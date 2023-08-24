@@ -19,12 +19,12 @@ args = p.parse_args()
 config = load(open(args.config))
 if "args" in config["evaluator"]["dataset"]:
     config["evaluator"]["dataset"]["args"] = {}
-assert config["evaluator"]["dataset"]["type"] == "mmlu", "This script is only for MMLU dataset"
+assert (
+    config["evaluator"]["dataset"]["type"] == "mmlu"
+), "This script is only for MMLU dataset"
 
 config["evaluator"]["dataset"]["args"] = {"subset": args.mmlu_subset}
-logger.info(
-    f"Evaluating MMLU-{config['evaluator']['dataset']['args']['subset']}"
-)
+logger.info(f"Evaluating MMLU-{config['evaluator']['dataset']['args']['subset']}")
 
 outfile_result = path.join(
     args.outdir, f"mmlu_{args.mmlu_subset}", f"{args.topk}_m100_p40_gpt35.jsonl"

@@ -1,5 +1,7 @@
 # RQABench: Retrieval QA Benchmark
 
+[![Documentation Status](https://readthedocs.org/projects/retrieval-qa-benchmark/badge/?version=latest)](https://retrieval-qa-benchmark.readthedocs.io/en/latest/?badge=latest)
+
 Retreival QA Benchmark (RQABench in short) is an open-sourced, end-to-end test workbench for Retrieval Augmented Generation (RAG) systems. We intend to build an open benchmark for all developers and researchers to reproduce and design new RAG systems. We also want to create a platform for everyone to share their lego blocks to help others to build up their own retrieval + LLM system.
 
 Here are some major feature of this benchmark:
