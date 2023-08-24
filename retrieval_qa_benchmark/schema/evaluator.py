@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional, Tuple, Callable
+from typing import Callable, List, Optional, Tuple
 
 from loguru import logger
 from pydantic import BaseModel, Extra
@@ -16,14 +16,17 @@ from retrieval_qa_benchmark.schema.transform import TransformGraph
 from retrieval_qa_benchmark.utils.profiler import PROFILER
 
 
+def default_matcher(x: str, y: QARecord) -> float:
+    return float(x == y.answer)
+
+
 class BaseEvaluator(BaseModel):
     """Base class for evaluators"""
 
     dataset: BaseDataset
     llm: BaseLLM
     transform: TransformGraph
-    matcher: Callable[[str, QARecord], float] = \
-        lambda x, y: float(x == y.answer)  # noqa: E731
+    matcher: Callable[[str, QARecord], float] = default_matcher
     out_file: Optional[str] = None
 
     class Config:
