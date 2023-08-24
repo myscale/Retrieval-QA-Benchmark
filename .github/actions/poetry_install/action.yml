@@ -58,4 +58,4 @@ runs:
           ~/.cache/pypoetry/cache
           ~/.cache/pypoetry/artifacts
           ${{ env.WORKDIR }}/.venv
-        key: py-deps-${{ runner.os }}-${{ runner.arch }}-py-${{ inputs.python-version }}-poetry-${{ inputs.poetry-version }}-${{ inputs.cache-key }}-${{ hashFiles(format('{0}/**/poetry.lock', env.WORKDIR)) }}
+        key: py-deps-${{ runner.os }}-${{ runner.arch }}-py-${{ inputs.python-version }}-poetry-${{ inputs.poetry-version }}-${{ inputs.cache-key }}-${{ hashFiles(format('**/poetry.lock', env.WORKDIR)) }}
