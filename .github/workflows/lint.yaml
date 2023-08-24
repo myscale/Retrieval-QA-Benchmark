@@ -83,7 +83,7 @@ jobs:
           echo "oldest-commit=$OLDEST_COMMIT" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python ${{ matrix.python-version }} + Poetry ${{ env.POETRY_VERSION }}
-        uses: "./.github/actions/poetry_setup"
+        uses: "./.github/actions/poetry_install"
         with:
           python-version: ${{ matrix.python-version }}
           poetry-version: ${{ env.POETRY_VERSION }}
