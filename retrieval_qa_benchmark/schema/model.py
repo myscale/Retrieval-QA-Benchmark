@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict
 
 from pydantic import BaseModel
 
@@ -23,6 +23,8 @@ class BaseLLM(BaseModel):
     """template to convert :class:`QARecord` into string"""
     context_template: str = "Context:\n{context}\n\n"
     """template to inject contexts"""
+    run_args: Dict[str, Any] = {}
+    """Runtime keyword arguments"""
 
     @property
     def tokenizer_type(self) -> str:

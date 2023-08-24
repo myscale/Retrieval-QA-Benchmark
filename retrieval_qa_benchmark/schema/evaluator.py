@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, List, Optional, Tuple
+from typing import List, Optional, Tuple, Callable
 
 from loguru import logger
 from pydantic import BaseModel, Extra
@@ -22,9 +22,9 @@ class BaseEvaluator(BaseModel):
     dataset: BaseDataset
     llm: BaseLLM
     transform: TransformGraph
-    matcher: Callable[[str, QARecord], float] = lambda x, y: float(x == y.answer)  # noqa: E731
+    matcher: Callable[[str, QARecord], float] = \
+        lambda x, y: float(x == y.answer)  # noqa: E731
     out_file: Optional[str] = None
-    threshold: float = 0.5
 
     class Config:
         extra = Extra.forbid
@@ -32,14 +32,11 @@ class BaseEvaluator(BaseModel):
     def __call__(self) -> Tuple[float, List[QAPrediction]]:
         PROFILER.clear()
         result: List[QAPrediction] = []
-        cnt = 0
         for d in tqdm(self.dataset.eval_set, desc="Evaluating"):
             try:
                 d_ = self.transform(d)
                 pred = self.llm.generate(d_)
                 mtch = self.matcher(pred.generated, d_)
-                if mtch > self.threshold:
-                    cnt += 1
                 prompt_tokens = pred.prompt_tokens
                 completion_tokens = pred.completion_tokens
                 if d_.stack and len(d_.stack) > 0:
@@ -67,13 +64,13 @@ class BaseEvaluator(BaseModel):
             except Exception as e:
                 logger.error(f"Failed to evaluate record {str(d)}")
                 raise e
-        acc = 100 * cnt / len(self.dataset)
+        score = 100 * sum([p.matched for p in result]) / len(self.dataset)
         logger.info(
             f"Evaluation finished! Executed Evaluator:{type(self)} on "
             f"Dataset:{self.dataset.name} with Model:{self.llm.name}. "
-            f"Accuracy: {acc:.2f}%"
+            f"Score: {score:.2f}%"
         )
         if self.out_file:
             with open(self.out_file, "w") as f:
                 f.write("\n".join([r.model_dump_json() for r in result]))
-        return acc, result
+        return score, result
