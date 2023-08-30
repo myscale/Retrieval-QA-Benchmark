@@ -151,13 +151,13 @@ class FaissElSearchBM25HybridSearcher(PluginVectorSearcher):
                     f"less than {num_selected}"
                 )
                 para_ids = (
-                    result_df.sort_values(by="score_rrf")["para_id"]
+                    result_df.sort_values(by="score_rrf",ascending=False)["para_id"]
                     .head(len(result_df))
                     .values
                 )
             else:
                 para_ids = (
-                    result_df.sort_values(by="score_rrf")["para_id"]
+                    result_df.sort_values(by="score_rrf",ascending=False)["para_id"]
                     .head(num_selected)
                     .values
                 )
