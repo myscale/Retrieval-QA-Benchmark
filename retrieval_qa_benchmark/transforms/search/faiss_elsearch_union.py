@@ -1,21 +1,19 @@
 import os
-from typing import Any, List, Optional, Tuple, Sequence, Callable
+from typing import Any, Callable, List, Optional, Sequence, Tuple
 
 import faiss
 import numpy as np
-import pandas as pd
 from loguru import logger
 from sentence_transformers import SentenceTransformer
 
 from retrieval_qa_benchmark.utils.profiler import PROFILER
 
 from .base import Entry, PluginVectorSearcher
-
 from .utils import text_preprocess
 
 
 class FaissElSearchBM25UnionSearcher(PluginVectorSearcher):
-    model_name: str
+    embedding_name: str
     index_path: str
     nprobe: int = 128
     el_host: str
@@ -29,8 +27,8 @@ class FaissElSearchBM25UnionSearcher(PluginVectorSearcher):
         logger.info("load index...")
         self.index = faiss.read_index(self.index_path)
         logger.info("load mpnet model...")
-        self.model = SentenceTransformer(self.model_name)
-        
+        self.model = SentenceTransformer(self.embedding_name)
+
     def search(
         self,
         query_list: list,
@@ -39,7 +37,9 @@ class FaissElSearchBM25UnionSearcher(PluginVectorSearcher):
     ) -> Tuple[List[List[float]], List[List[Entry]]]:
         if context is not None and context not in [[], [None]]:
             logger.warning("Ignoring context data in faiss elastic search search...")
-        return self.faiss_bm25_union_filter(query_list=query_list, num_selected=num_selected)
+        return self.faiss_bm25_union_filter(
+            query_list=query_list, num_selected=num_selected
+        )
 
     @PROFILER.profile_function("database.FaissSearch.emb_filter.profile")
     def emb_filter(
@@ -60,18 +60,19 @@ class FaissElSearchBM25UnionSearcher(PluginVectorSearcher):
         self.index.nprobe = self.nprobe
         D_list, para_id_list = self.index.search(query_list, num_selected)
         return D_list, para_id_list
-    
+
     @PROFILER.profile_function("database.FaissSearch.bm25_filter.profile")
     def bm25_filter(
         self, query_list: List[str], num_selected: int
     ) -> Tuple[List[List[float]], List[List[int]]]:
         from elasticsearch import Elasticsearch
+
         es = Elasticsearch(hosts=self.el_host, basic_auth=self.el_auth)
         para_id_list = []
         score_list = []
         for i in range(len(query_list)):
             query = query_list[i]
-            query_pp = ' '.join(self.text_preprocess(query))
+            query_pp = " ".join(self.text_preprocess(query))
             query_ = {"match": {"context": query_pp}}
             result = es.search(index="wiki-index", query=query_, size=num_selected)
             para_ids = [int(item["_id"]) for item in result["hits"]["hits"]]
@@ -79,7 +80,6 @@ class FaissElSearchBM25UnionSearcher(PluginVectorSearcher):
             para_id_list.append(para_ids)
             score_list.append(scores)
         return score_list, para_id_list
-    
 
     def faiss_bm25_union_filter(
         self, query_list: List[str], num_selected: int
@@ -97,18 +97,21 @@ class FaissElSearchBM25UnionSearcher(PluginVectorSearcher):
                 para_id = para_ids_emb[i]
                 if para_id not in para_ids:
                     para_ids.append(para_id)
-                    ranks.append(i+1)
+                    ranks.append(i + 1)
                 if len(para_ids) >= num_selected:
                     break
                 para_id = para_ids_bm25[i]
                 if para_id not in para_ids:
                     para_ids.append(para_id)
-                    ranks.append(i+1)
+                    ranks.append(i + 1)
                 if len(para_ids) >= num_selected:
                     break
             if len(para_ids) < num_selected:
-                logger.warning(f"Only {len(para_ids)} unique paragraphs found, less than {num_selected}")
+                logger.warning(
+                    f"Only {len(para_ids)} unique paragraphs found, "
+                    f"less than {num_selected}"
+                )
             para_id_list.append(para_ids)
-            rank_list.append(ranks)
+            rank_list.append([ 1 / (i+1) for i in ranks])
         entry_list = self.para_id_list_to_entry(para_id_list)
         return rank_list, entry_list

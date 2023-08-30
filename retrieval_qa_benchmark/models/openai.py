@@ -51,7 +51,7 @@ class RemoteLLM(BaseLLM):
                     completion_tokens=completion.usage.completion_tokens,
                 )
             except openai.error.ServiceUnavailableError as e:
-                print('ServiceUnavailableError', e)
+                print("ServiceUnavailableError", e)
                 continue
 
 
@@ -99,5 +99,5 @@ class ChatGPT(GPT):
                     completion_tokens=completion.usage.completion_tokens,
                 )
             except openai.error.ServiceUnavailableError as e:
-                print('ServiceUnavailableError', e)
+                print("ServiceUnavailableError", e)
                 continue

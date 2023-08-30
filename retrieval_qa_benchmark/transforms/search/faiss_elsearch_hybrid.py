@@ -1,5 +1,5 @@
 import os
-from typing import Any, List, Optional, Tuple, Sequence, Callable
+from typing import Any, List, Optional, Sequence, Tuple
 
 import faiss
 import numpy as np
@@ -10,12 +10,11 @@ from sentence_transformers import SentenceTransformer
 from retrieval_qa_benchmark.utils.profiler import PROFILER
 
 from .base import Entry, PluginVectorSearcher
-
 from .utils import text_preprocess
 
 
 class FaissElSearchBM25HybridSearcher(PluginVectorSearcher):
-    model_name: str
+    embedding_name: str
     index_path: str
     nprobe: int = 128
     el_host: str
@@ -24,15 +23,15 @@ class FaissElSearchBM25HybridSearcher(PluginVectorSearcher):
     dataset_split: str = "train"
     num_filtered: int
     is_raw_rank: bool
-    text_preprocess: Callable = text_preprocess
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         logger.info("load index...")
         self.index = faiss.read_index(self.index_path)
         logger.info("load mpnet model...")
-        self.model = SentenceTransformer(self.model_name)
-        
+        self.model = SentenceTransformer(self.embedding_name)
+        self.text_preprocess = text_preprocess
+
     def search(
         self,
         query_list: list,
@@ -41,7 +40,12 @@ class FaissElSearchBM25HybridSearcher(PluginVectorSearcher):
     ) -> Tuple[List[List[float]], List[List[Entry]]]:
         if context is not None and context not in [[], [None]]:
             logger.warning("Ignoring context data in faiss elastic search search...")
-        return self.faiss_bm25_hybrid_filter(query_list=query_list, num_selected=num_selected, num_filtered=self.num_filtered, is_raw_rank=self.is_raw_rank)
+        return self.faiss_bm25_hybrid_filter(
+            query_list=query_list,
+            num_selected=num_selected,
+            num_filtered=self.num_filtered,
+            is_raw_rank=self.is_raw_rank,
+        )
 
     @PROFILER.profile_function("database.FaissSearch.emb_filter.profile")
     def emb_filter(
@@ -62,18 +66,23 @@ class FaissElSearchBM25HybridSearcher(PluginVectorSearcher):
         self.index.nprobe = self.nprobe
         D_list, para_id_list = self.index.search(query_list, num_selected)
         return D_list, para_id_list
-    
+
     @PROFILER.profile_function("database.FaissSearch.bm25_filter.profile")
     def bm25_filter(
         self, query_list: List[str], num_selected: int
     ) -> Tuple[List[List[float]], List[List[int]]]:
         from elasticsearch import Elasticsearch
-        es = Elasticsearch(hosts=self.el_host, basic_auth=self.el_auth)
+
+        es = Elasticsearch(
+            hosts=self.el_host,
+            basic_auth=self.el_auth,
+            request_timeout=1000,
+        )
         para_id_list = []
         score_list = []
         for i in range(len(query_list)):
             query = query_list[i]
-            query_pp = ' '.join(self.text_preprocess(query))
+            query_pp = " ".join(self.text_preprocess(query))
             query_ = {"match": {"context": query_pp}}
             result = es.search(index="wiki-index", query=query_, size=num_selected)
             para_ids = [int(item["_id"]) for item in result["hits"]["hits"]]
@@ -81,21 +90,23 @@ class FaissElSearchBM25HybridSearcher(PluginVectorSearcher):
             para_id_list.append(para_ids)
             score_list.append(scores)
         return score_list, para_id_list
-    
-    
+
     def faiss_bm25_hybrid_filter(
-        self, query_list: List[str], num_selected: int, num_filtered: int, is_raw_rank: bool
+        self,
+        query_list: List[str],
+        num_selected: int,
+        num_filtered: int,
+        is_raw_rank: bool,
     ) -> Tuple[List[List[float]], List[List[Entry]]]:
-        
-        def rrf(rank_list: List[Any], k_list: List[int] = [40,40]) -> Optional[float]:
+        def rrf(rank_list: List[Any], k_list: List[int] = [40, 40]) -> List[float]:
             score_rrf = None
             for rank, k in zip(rank_list, k_list):
                 if score_rrf is None:
                     score_rrf = 1 / (k + rank)
                 else:
                     score_rrf += 1 / (k + rank)
-            return score_rrf
-        
+            return score_rrf.tolist() if score_rrf is not None else [0.0] * len(rank_list)
+
         D_list, para_id_list_emb = self.emb_filter(query_list, num_filtered)
         score_list, para_id_list_bm25 = self.bm25_filter(query_list, num_filtered)
         para_id_list = []
@@ -104,30 +115,41 @@ class FaissElSearchBM25HybridSearcher(PluginVectorSearcher):
             result_df = pd.DataFrame()
             para_ids_emb = para_id_list_emb[j].tolist()
             para_ids_bm25 = para_id_list_bm25[j]
-            para_ids_interscetion = list(set.intersection(set(para_ids_emb), set(para_ids_bm25)))
+            para_ids_intersection = list(
+                set.intersection(set(para_ids_emb), set(para_ids_bm25))
+            )
             raw_rank_emb = []
             raw_rank_bm25 = []
-            for para_id in para_ids_interscetion:
+            for para_id in para_ids_intersection:
                 idx_emb = para_ids_emb.index(para_id)
                 raw_rank_emb.append(idx_emb + 1)
                 idx_bm25 = para_ids_bm25.index(para_id)
                 raw_rank_bm25.append(idx_bm25 + 1)
-            result_df['para_id'] = para_ids_interscetion
-            result_df['raw_rank_emb'] = raw_rank_emb
-            result_df['raw_rank_bm25'] = raw_rank_bm25
-            pro_rank_emb = result_df['raw_rank_emb'].rank(method='min').values.reshape(-1)
-            pro_rank_bm25 = result_df['raw_rank_bm25'].rank(method='min').values.reshape(-1)
-            result_df['pro_rank_emb'] = pro_rank_emb
-            result_df['pro_rank_bm25'] = pro_rank_bm25
+            result_df["para_id"] = para_ids_intersection
+            result_df["raw_rank_emb"] = raw_rank_emb
+            result_df["raw_rank_bm25"] = raw_rank_bm25
+            pro_rank_emb = (
+                result_df["raw_rank_emb"].rank(method="min").values.reshape(-1)
+            )
+            pro_rank_bm25 = (
+                result_df["raw_rank_bm25"].rank(method="min").values.reshape(-1)
+            )
+            result_df["pro_rank_emb"] = pro_rank_emb
+            result_df["pro_rank_bm25"] = pro_rank_bm25
             if is_raw_rank:
-                rank_names = ['raw_rank_emb', 'raw_rank_bm25']
+                rank_names = ["raw_rank_emb", "raw_rank_bm25"]
             else:
-                rank_names = ['pro_rank_emb', 'pro_rank_bm25']
-            rank_list = [result_df[rank_name].values.reshape(-1) for rank_name in rank_names]
+                rank_names = ["pro_rank_emb", "pro_rank_bm25"]
+            rank_list = [
+                result_df[rank_name].values.reshape(-1) for rank_name in rank_names
+            ]
             score_rrf = rrf(rank_list)
-            result_df['score_rrf'] = score_rrf
+            result_df["score_rrf"] = score_rrf
             if len(result_df) < num_selected:
-                logger.warning(f"Only {len(result_df)} unique paragraphs found, less than {num_selected}")
+                logger.warning(
+                    f"Only {len(result_df)} unique paragraphs found, "
+                    f"less than {num_selected}"
+                )
                 para_ids = (
                     result_df.sort_values(by="score_rrf")["para_id"]
                     .head(len(result_df))

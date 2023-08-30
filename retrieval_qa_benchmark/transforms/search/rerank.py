@@ -64,9 +64,12 @@ class RerankSearcher(BaseSearcher):
     ):
         super().__init__(*args, **kwargs)
         if "el_bm25" in self.rank_dict:
-            assert self.el_host != "", "You must set elastic search host name to use it!"
-            assert self.el_auth[0] == "elastic" and self.el_auth[1] != "", \
-                "You should give valid password to use elastic search!"
+            assert (
+                self.el_host != ""
+            ), "You must set elastic search host name to use it!"
+            assert (
+                self.el_auth[0] == "elastic" and self.el_auth[1] != ""
+            ), "You should give valid password to use elastic search!"
         if "colbert" in self.rank_dict:
             logger.info("load Colbert model...")
             self.Colbert_init()
@@ -131,24 +134,22 @@ class RerankSearcher(BaseSearcher):
             .values.reshape(-1)
         )
         return rank, scores
-    
+
     def el_bm25(
         self, keywords: List[str], entries: List[Entry]
     ) -> Tuple[Union[List[Entry], List[List[Entry]]], List[float]]:
         from elasticsearch import Elasticsearch
-        es = Elasticsearch(
-            hosts = self.el_host,
-            basic_auth=self.el_auth
-        )
-        query_pp = ' '.join(keywords)
+
+        es = Elasticsearch(hosts=self.el_host, basic_auth=self.el_auth)
+        query_pp = " ".join(keywords)
         query_ = {"match": {"context": query_pp}}
-        result = es.search(index='wiki-index', query=query_)
+        result = es.search(index="wiki-index", query=query_)
         scores = []
         for entry in entries:
             entry_id = entry.paragraph_id
-            for item in result['hits']['hits']:
-                if int(item['_id']) == entry_id:
-                    scores.append(float(item['_score']))
+            for item in result["hits"]["hits"]:
+                if int(item["_id"]) == entry_id:
+                    scores.append(float(item["_score"]))
         rank = (
             pd.DataFrame(scores)
             .rank(ascending=False, method="average")
