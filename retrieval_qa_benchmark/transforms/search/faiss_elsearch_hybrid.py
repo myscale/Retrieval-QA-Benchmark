@@ -105,7 +105,9 @@ class FaissElSearchBM25HybridSearcher(PluginVectorSearcher):
                     score_rrf = 1 / (k + rank)
                 else:
                     score_rrf += 1 / (k + rank)
-            return score_rrf.tolist() if score_rrf is not None else [0.0] * len(rank_list)
+            return (
+                score_rrf.tolist() if score_rrf is not None else [0.0] * len(rank_list)
+            )
 
         D_list, para_id_list_emb = self.emb_filter(query_list, num_filtered)
         score_list, para_id_list_bm25 = self.bm25_filter(query_list, num_filtered)
@@ -151,13 +153,13 @@ class FaissElSearchBM25HybridSearcher(PluginVectorSearcher):
                     f"less than {num_selected}"
                 )
                 para_ids = (
-                    result_df.sort_values(by="score_rrf",ascending=False)["para_id"]
+                    result_df.sort_values(by="score_rrf", ascending=False)["para_id"]
                     .head(len(result_df))
                     .values
                 )
             else:
                 para_ids = (
-                    result_df.sort_values(by="score_rrf",ascending=False)["para_id"]
+                    result_df.sort_values(by="score_rrf", ascending=False)["para_id"]
                     .head(num_selected)
                     .values
                 )

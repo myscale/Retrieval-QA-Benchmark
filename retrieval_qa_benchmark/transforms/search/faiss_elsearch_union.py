@@ -112,6 +112,6 @@ class FaissElSearchBM25UnionSearcher(PluginVectorSearcher):
                     f"less than {num_selected}"
                 )
             para_id_list.append(para_ids)
-            rank_list.append([ 1 / (i+1) for i in ranks])
+            rank_list.append([1 / (i + 1) for i in ranks])
         entry_list = self.para_id_list_to_entry(para_id_list)
         return rank_list, entry_list

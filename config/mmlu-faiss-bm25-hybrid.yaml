@@ -1,7 +1,8 @@
 evaluator: 
+  type: mcsa
   outfile: mmlu-llama2-remote-retrieval-base.jsonl
   dataset: !include datasets/mmlu.yaml
-  model: !include models/chatgpt35.yaml
-  transform_chain:
-    chain: 
+  model: !include models/remote-llama-13b.yaml
+  transform:
+    nodes: 
       - !include transforms/faiss-bm25-hybrid.yaml
