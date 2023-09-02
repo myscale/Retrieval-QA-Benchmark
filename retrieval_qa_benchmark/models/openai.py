@@ -4,6 +4,7 @@ import os
 from typing import Any, Dict, Optional
 
 import openai
+import litellm
 
 from retrieval_qa_benchmark.schema import BaseLLM, BaseLLMOutput
 from retrieval_qa_benchmark.utils.registry import REGISTRY
@@ -79,7 +80,7 @@ class ChatGPT(GPT):
         self,
         text: str = "",
     ) -> BaseLLMOutput:
-        completion = openai.ChatCompletion.create(
+        completion = litellm.completion(
             model=self.name,
             messages=[
                 {"role": "system", "content": self.system_prompt},
