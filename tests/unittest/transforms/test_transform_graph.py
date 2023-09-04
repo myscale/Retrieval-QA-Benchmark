@@ -12,7 +12,7 @@ sys.path.insert(0, path.dirname(path.split(__file__)[0]))
 from dummy import *  # noqa: F403, E402
 
 
-@pytest.mark.parametrize("num_base", [random.randint(20, 100) for _ in range(5)])
+@pytest.mark.parametrize("num_base", [random.randint(20, 100) for _ in range(100)])
 def test_transfor_graph(num_base: int) -> None:
     import math
     from os import path

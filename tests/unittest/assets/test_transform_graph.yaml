@@ -5,8 +5,8 @@ evaluator:
       t1:
         type: dummy1
         next: 
-          - t3
           - t2
+          - t3
       t2:
         type: dummy2
         next: 
