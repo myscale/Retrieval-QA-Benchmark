@@ -1,0 +1,10 @@
+type: "tgi"
+args:
+  name: "llama2-13b-chat-hf"
+  backend_url: "your-tgi-backend-url"
+  system_prompt: ""
+  record_template: "[INST]The following are multiple choice questions (with answers) with context:\n\n{context}Question: {question}\n{choices}[/INST]Answer: "
+run_args:
+  max_new_tokens: 30
+  stop_sequences: 
+    - ".\n\n"

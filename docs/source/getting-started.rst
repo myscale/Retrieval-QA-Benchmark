@@ -26,7 +26,7 @@ Install from source
     cd Retrieval-QA-Benchmark && python3 -m pip3 install -e .
 
 .. note::
-    For users who does not GPUs, you need a CPU version of pytorch with
+    For users who does not have any GPU, you need a CPU version of pytorch installed by
     
     .. code-block:: bash
 
@@ -259,7 +259,7 @@ This is a sample code for end-to-end evaluation
     # This will print all loaded modules. You can also use it as reference to edit your configuration
     print(str(REGISTRY))
 
-    # Choose a configuration to evaluatoe
+    # Choose a configuration to evaluate
     config = load(open("config/mmlu-myscale.yaml"))
     evaluator = EvaluatorFactory.from_config(config).build()
     

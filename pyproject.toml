@@ -40,6 +40,7 @@ types-pyyaml = "^6.0.12.11"
 clickhouse-connect = "^0.6.8"
 rake-nltk = "^1.0.6"
 faiss-cpu = "^1.7.4"
+huggingface-hub = "^0.16.4"
 
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = "^2.0.1"
@@ -63,7 +64,7 @@ select = [
   "F",  # pyflakes
   "I",  # isort
 ]
-exclude = ["scripts/"]
+exclude = ["scripts/", "eval.py"]
 
 [tool.mypy]
 ignore_missing_imports = "True"
