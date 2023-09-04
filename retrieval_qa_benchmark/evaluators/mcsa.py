@@ -15,10 +15,14 @@ def mcsa_fuzzy_matcher(pred_str: str, gold: QARecord) -> float:
             gold_id = gold.choices.index(gold.answer)
             if (
                 f"{chr(65 + gold_id)}." in pred
-                and sum([f"{chr(65 + n)}." in pred for n in range(len(gold.choices))]) == 1
+                and sum([f"{chr(65 + n)}." in pred for n in range(len(gold.choices))])
+                == 1
             ):
                 return 1.0
-            if len(pred) == 1 and pred[0] == f"{chr(65 + gold.choices.index(gold.answer))}":
+            if (
+                len(pred) == 1
+                and pred[0] == f"{chr(65 + gold.choices.index(gold.answer))}"
+            ):
                 return 1.0
     return 0.0
 

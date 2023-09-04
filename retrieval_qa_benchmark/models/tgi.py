@@ -1,15 +1,15 @@
-from typing import Any, Optional, Dict
+from typing import Any, Dict, Optional
+
 from huggingface_hub import InferenceClient
-from retrieval_qa_benchmark.models import RemoteLLM
-from retrieval_qa_benchmark.schema.datatypes import QARecord
-from retrieval_qa_benchmark.schema.model import BaseLLMOutput
+
+from retrieval_qa_benchmark.schema.model import BaseLLM, BaseLLMOutput
 from retrieval_qa_benchmark.utils.registry import REGISTRY
-from retrieval_qa_benchmark.utils.profiler import PROFILER
 
 
 @REGISTRY.register_model("tgi")
-class TGI_LLM(RemoteLLM):
+class TGI_LLM(BaseLLM):
     client: InferenceClient
+    system_prompt: str = "You are a helpful assistant."
 
     class Config:
         arbitrary_types_allowed = True
@@ -31,10 +31,11 @@ class TGI_LLM(RemoteLLM):
             system_prompt=system_prompt or "",
             **kwargs,
         )
+
     def _generate(self, text: str) -> BaseLLMOutput:
         resp = self.client.text_generation(
-            "\n".join([self.system_prompt, text]), 
-            **self.run_args, 
+            "\n".join([self.system_prompt, text]),
+            **self.run_args,
             details=True,
             decoder_input_details=True,
         )
