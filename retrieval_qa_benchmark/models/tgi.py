@@ -33,10 +33,13 @@ class TGI_LLM(RemoteLLM):
         )
     def _generate(self, text: str) -> BaseLLMOutput:
         resp = self.client.text_generation(
-            "\n".join([self.system_prompt, text]), **self.run_args, details=True
+            "\n".join([self.system_prompt, text]), 
+            **self.run_args, 
+            details=True,
+            decoder_input_details=True,
         )
         return BaseLLMOutput(
             generated=resp.generated_text,
-            prompt_tokens=resp.details.generated_tokens,
-            completion_tokens=len(resp.details.prefill),
+            completion_tokens=resp.details.generated_tokens,
+            prompt_tokens=len(resp.details.prefill),
         )
