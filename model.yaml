@@ -3,8 +3,8 @@ args:
   name: "llama2-13b-chat-hf"
   backend_url: "http://10.1.2.118:8080"
   system_prompt: ""
-  record_template: "[INST]The following are multiple choice questions (with answers) with context:\n\n{context}Question: {question}\n{choices}[/INST]Answer: "
+  record_template: "[INST]The following are multiple choice questions (with answers) with context:\n\n{context}Question: {question}\n{choices}[/INST] Answer: Let's think step by step."
 run_args:
   max_new_tokens: 30
-  stop_sequences:
-    - ".\n\n"
+  # stop_sequences:
+  #   - ".\n\n"
