@@ -1,0 +1,22 @@
+evaluator:
+  type: mcsa
+  outfile: mmlu-hybrid.jsonl
+  dataset:
+    type: mmlu
+  model:
+    type: "tgi"
+    args:
+      name: "llama2-13b-chat-hf"
+      backend_url: "http://10.1.2.118:8080"
+      system_prompt: ""
+      record_template: "[INST]The following are multiple choice questions (with answers) with context:\n\n{context}Question: {question}\n{choices}[/INST]Answer: "
+    run_args:
+      max_new_tokens: 30
+      stop_sequences:
+        - ".\n\n"
+  transform:
+    nodes:
+      - type: Faiss
+        args:
+          num_selected: 5
+          index_path: /mnt/workspaces/yongqij/evals/data/indexes/Cohere_mpnet/IVFSQ_L2.index
