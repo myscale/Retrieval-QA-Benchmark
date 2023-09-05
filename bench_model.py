@@ -1,5 +1,6 @@
 import json
 import time
+import sys
 import types
 import logging.config
 from glob import glob
@@ -72,6 +73,8 @@ def bench_rag(*, max_records:'n'=1000, num_threads:'t'=4,
             pred["time"] = t
             result_records.append(pred)
             if report_interval > 0 and t - t_last > report_interval:
+                # clear current line
+                sys.stdout.write("\r\033[K")
                 report_stats(result_records, t_last)
                 t_last = t
 
