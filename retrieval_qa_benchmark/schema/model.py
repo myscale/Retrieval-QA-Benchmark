@@ -9,8 +9,11 @@ from retrieval_qa_benchmark.schema.datatypes import QARecord
 
 class BaseLLMOutput(BaseModel):
     generated: str
+    """generated text in plain string"""
     prompt_tokens: int
+    """number of input tokens"""
     completion_tokens: int
+    """number of generated tokens"""
 
 
 class BaseLLM(BaseModel):
