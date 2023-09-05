@@ -1,7 +1,17 @@
 from typing import Any, Dict, List
 
-from retrieval_qa_benchmark.schema import BaseTransform
-from retrieval_qa_benchmark.transforms.search.base import BaseSearcher
+from retrieval_qa_benchmark.schema import BaseTransform, BaseLLM
+from retrieval_qa_benchmark.transforms.searchers.base import BaseSearcher
+from retrieval_qa_benchmark.utils.factory import ModelFactory
+
+
+class BaseLLMTransform(BaseTransform):
+    model: Dict[str, Any]
+    """model configuration for transforms with LLM"""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._llm: BaseLLM = ModelFactory.from_config(self.model).build()
 
 
 class BaseContextTransform(BaseTransform):

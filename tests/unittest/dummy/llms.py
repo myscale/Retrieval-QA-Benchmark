@@ -7,7 +7,7 @@ from retrieval_qa_benchmark.utils.registry import REGISTRY
 class DummyLLM(BaseLLM):
     name: str = "dummy"
 
-    def _generate(self, text: str) -> BaseLLMOutput:
+    def generate(self, text: str) -> BaseLLMOutput:
         ret = f"{text}: hello world!"
         return BaseLLMOutput(
             generated=ret, prompt_tokens=len(text), completion_tokens=len(ret)

@@ -32,7 +32,7 @@ class TGI_LLM(BaseLLM):
             **kwargs,
         )
 
-    def _generate(self, text: str) -> BaseLLMOutput:
+    def generate(self, text: str) -> BaseLLMOutput:
         resp = self.client.text_generation(
             "\n".join([self.system_prompt, text]),
             **self.run_args,

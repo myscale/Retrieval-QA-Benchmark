@@ -34,11 +34,11 @@ class BaseLLM(BaseModel):
     def build(cls, **kwargs: Any) -> BaseLLM:
         return cls(**kwargs)
 
-    def generate(
+    def __call__(
         self,
         text: QARecord,
     ) -> BaseLLMOutput:
-        return self._generate(self.convert_record(text))
+        return self.generate(self.convert_record(text))
 
     def convert_record(self, data: QARecord) -> str:
         choices = ""
@@ -56,5 +56,5 @@ class BaseLLM(BaseModel):
             question=data.question, choices=choices, context=context_str
         )
 
-    def _generate(self, text: str) -> BaseLLMOutput:
+    def generate(self, text: str) -> BaseLLMOutput:
         raise NotImplementedError

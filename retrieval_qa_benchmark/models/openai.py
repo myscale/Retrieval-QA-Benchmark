@@ -34,7 +34,7 @@ class RemoteLLM(BaseLLM):
             **kwargs,
         )
 
-    def _generate(
+    def generate(
         self,
         text: str,
     ) -> BaseLLMOutput:
@@ -79,7 +79,7 @@ class GPT(RemoteLLM):
 
 @REGISTRY.register_model("chatgpt35")
 class ChatGPT(GPT):
-    def _generate(
+    def generate(
         self,
         text: str = "",
     ) -> BaseLLMOutput:

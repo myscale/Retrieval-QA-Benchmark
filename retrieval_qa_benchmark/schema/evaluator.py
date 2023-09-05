@@ -38,7 +38,7 @@ class BaseEvaluator(BaseModel):
         for d in tqdm(self.dataset.eval_set, desc="Evaluating"):
             try:
                 d_ = self.transform(d)
-                pred = self.llm.generate(d_)
+                pred = self.llm(d_)
                 mtch = self.matcher(pred.generated, d_)
                 prompt_tokens = pred.prompt_tokens
                 completion_tokens = pred.completion_tokens
