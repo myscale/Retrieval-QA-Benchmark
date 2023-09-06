@@ -1,10 +1,24 @@
-type: "tgi"
-args:
-  name: "llama2-13b-chat-hf"
-  backend_url: "http://10.1.2.118:8080"
-  system_prompt: ""
-  record_template: "[INST]The following are multiple choice questions (with answers) with context:\n\n{context}Question: {question}\n{choices}[/INST] Answer: Let's think step by step."
-run_args:
-  max_new_tokens: 30
-  # stop_sequences:
-  #   - ".\n\n"
+llama2-13b-3090x2:
+  type: "tgi"
+  args:
+    name: "llama2-13b-chat-hf"
+    backend_url: "http://10.1.2.118:8080"
+    system_prompt: ""
+    record_template: "[INST]The following are multiple choice questions (with answers) with context:\n\n{context}Question: {question}\n{choices}[/INST] Answer: Let's think step by step."
+  run_args:
+    max_new_tokens: 30
+    # stop_sequences:
+    #   - ".\n\n"
+
+llama2-13b-a100:
+  type: "tgi"
+  args:
+    name: "llama-2-13B-ensemble-v5"
+    backend_url: "https://70c84pqlweamkl-80.proxy.runpod.net"
+    system_prompt: ""
+    record_template: "[INST]The following are multiple choice questions (with answers) with context:\n\n{context}Question: {question}\n{choices}[/INST] Answer: Let's think step by step."
+  run_args:
+    max_new_tokens: 30
+    # stop_sequences:
+    #   - ".\n\n"
+

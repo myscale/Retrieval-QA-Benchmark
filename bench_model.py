@@ -39,14 +39,15 @@ def report_stats(records, t_prev):
                  req_throughput, prompt_throughput, avg_prompt_len,
                  completion_throughput, avg_completion_len)
 
-def bench_rag(*, max_records:'n'=1000, num_threads:'t'=4,
-              config_file:'c'="model.yaml", max_new_tokens:'m'=100,
+def bench_rag(*, max_records:'n'=1000, num_threads:'t'=4, config_file:'c'="model.yaml",
+              model_name:'m'="default", max_new_tokens:'o'=100,
               jsonl_files:'j'="results-tgi/mmlu*.jsonl", report_interval:'i'=30):
-    logging.info("Run RAG performance benchmark with config_file=%s, jsonl_files=%s",
-                 config_file, jsonl_files)
+    logging.info("Run RAG performance benchmark with config_file=%s, model=%s, jsonl_files=%s",
+                 config_file, model_name, jsonl_files)
 
     with open(config_file) as f:
         config = load(f)
+    config = config[model_name]
     config["run_args"]["max_new_tokens"] = max_new_tokens
     model: BaseLLM = ModelFactory.from_config(config).build()
 
