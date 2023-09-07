@@ -2,7 +2,7 @@
 
 THREADS_LIST=(4 8 16 32 64 128)
 ITERATIONS=-1
-MODEL="llama-2-13B-ensemble-v5"
+MODEL="llama-2-13B-ensemble-v5-a100"
 CONTEXTS=(1 2 3 5 10)
 
 for THREADS in "${THREADS_LIST[@]}"; do
