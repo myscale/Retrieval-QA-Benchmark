@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple
 
 from langchain.agents.agent_toolkits.sql.prompt import SQL_PREFIX, SQL_SUFFIX
 from langchain.agents.mrkl.prompt import FORMAT_INSTRUCTIONS
@@ -72,7 +72,7 @@ class LangChainSQLAgentTool(AgentTool):
         self._db = SQLDatabase(self._engine, None, self._metadata)
         self._tool: Any = None
 
-    def set_children(self, children: List[BaseTransform | None]) -> None:
+    def set_children(self, children: List[Optional[BaseTransform]]) -> None:
         assert len(children) == 1, f"{self.name} should only have one outgoing route."
         super().set_children(children)
 

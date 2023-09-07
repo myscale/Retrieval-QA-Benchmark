@@ -82,14 +82,14 @@ class AgentTool(AgentBase):
     descrption: str
     """description of this tool"""
 
-    def parse_extra(self, generate: str) -> ToolHistory | None:
+    def parse_extra(self, generate: str) -> Union[ToolHistory, None]:
         return ToolHistory(result=generate)
 
-    def set_children(self, children: List[BaseTransform | None]) -> None:
+    def set_children(self, children: List[Union[BaseTransform, None]]) -> None:
         """Set children for transform
 
         :param children: next nodes to execute
-        :type children: List[BaseTransform  |  None]
+        :type children: List[Union[BaseTransform, None]]
         """
         for n in children:
             if n:
@@ -122,11 +122,11 @@ class AgentRouter(AgentBase, BaseLLMTransform):
         # overrides the template to format `QARecord`
         self._llm.record_template = self.record_template
 
-    def set_children(self, children: List[BaseTransform | None]) -> None:
+    def set_children(self, children: List[Union[BaseTransform, None]]) -> None:
         """Set children for transform
 
         :param children: next nodes to execute
-        :type children: List[BaseTransform  |  None]
+        :type children: List[Union[BaseTransform, None]]
         """
         for n in children:
             if n:
