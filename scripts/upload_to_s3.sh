@@ -13,4 +13,4 @@ coscmd upload RQA.tar.gz RQA/
 
 # clean everything
 rm -rf "${current_dir}/RQA"
-rm -rf "${current_dir}/RQA.tar.gz"
+# rm -rf "${current_dir}/RQA.tar.gz"
