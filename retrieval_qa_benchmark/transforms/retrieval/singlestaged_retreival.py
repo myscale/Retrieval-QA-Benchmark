@@ -1,7 +1,7 @@
 from typing import Any, Sequence, Tuple
 
 from retrieval_qa_benchmark.transforms.base import BaseContextTransform
-from retrieval_qa_benchmark.transforms.search import (
+from retrieval_qa_benchmark.transforms.searchers import (
     ElSearchSearcher,
     FaissSearcher,
     MyScaleSearcher,

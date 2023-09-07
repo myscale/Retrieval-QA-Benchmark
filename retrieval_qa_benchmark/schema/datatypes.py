@@ -21,7 +21,7 @@ class QARecord(BaseModel):
     """list of context strings that are retrieved from db or other sources"""
     choices: Optional[Sequence[str]] = None
     """choices where model should be choosing from. only present in ['mcsa', 'mcma']"""
-    stack: Optional[List["QAPrediction"]] = []
+    stack: Optional[List["LLMHistory"]] = []
     """stacked intermediate prediction results (for multi-hop qa pipelines)"""
 
     class Config:
@@ -35,9 +35,9 @@ class QAPrediction(QARecord):
     """number of input tokens"""
     completion_tokens: int = 0
     """number of generated tokens"""
-    pred: str
+    generated: str
     """output from the model, is compared with the true answer in :class:`QARecord`"""
-    matched: float
+    matched: float = 0.0
     """match score that measures how accurate this prediction is to the answer"""
     profile_time: Optional[Dict[str, Union[int, float]]] = {}
     """accumulated time profiling regarding to each function"""
@@ -45,3 +45,32 @@ class QAPrediction(QARecord):
     """accumulated number of execution to each profiled functions"""
     profile_avg: Optional[Dict[str, float]] = {}
     """calculated averaged time consumption. equals to time / count."""
+
+
+class BaseLLMOutput(BaseModel):
+    generated: str
+    prompt_tokens: int
+    completion_tokens: int
+
+
+class ToolHistory(BaseModel):
+    """Tool call history"""
+
+    thought: str = ""
+    """rationale step from LLM"""
+    tool: Optional[str] = None
+    """function called in this history"""
+    tool_inputs: Union[str, dict, None] = None
+    """Input for this tool call"""
+    result: Optional[str] = None
+    """Output from this function call"""
+
+
+class LLMHistory(BaseLLMOutput):
+    """LLM output history"""
+
+    created_by: str = "default"
+    """Which node creates this """
+    comment: str = ""
+    """extra comments to this generation"""
+    extra: Union[ToolHistory, None] = None

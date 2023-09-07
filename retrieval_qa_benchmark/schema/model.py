@@ -4,16 +4,7 @@ from typing import Any, Dict
 
 from pydantic import BaseModel
 
-from retrieval_qa_benchmark.schema.datatypes import QARecord
-
-
-class BaseLLMOutput(BaseModel):
-    generated: str
-    """generated text in plain string"""
-    prompt_tokens: int
-    """number of input tokens"""
-    completion_tokens: int
-    """number of generated tokens"""
+from retrieval_qa_benchmark.schema.datatypes import BaseLLMOutput, QARecord
 
 
 class BaseLLM(BaseModel):
@@ -37,11 +28,11 @@ class BaseLLM(BaseModel):
     def build(cls, **kwargs: Any) -> BaseLLM:
         return cls(**kwargs)
 
-    def generate(
+    def __call__(
         self,
         text: QARecord,
     ) -> BaseLLMOutput:
-        return self._generate(self.convert_record(text))
+        return self.generate(self.convert_record(text))
 
     def convert_record(self, data: QARecord) -> str:
         choices = ""
@@ -59,5 +50,5 @@ class BaseLLM(BaseModel):
             question=data.question, choices=choices, context=context_str
         )
 
-    def _generate(self, text: str) -> BaseLLMOutput:
+    def generate(self, text: str) -> BaseLLMOutput:
         raise NotImplementedError

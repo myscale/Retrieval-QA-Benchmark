@@ -25,7 +25,9 @@ def test_seq(num_base: int) -> None:
             )
         )
     )
-    graph = TransformGraphFactory(nodes_config=config["evaluator"]["transform"]).build()
+    graph = TransformGraphFactory.from_config(
+        config=config["evaluator"]["transform"]
+    ).build()
     d = graph(
         QARecord(
             id="test1", question="*" * num_base, answer="answer for test 1", type="open"

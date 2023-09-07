@@ -1,0 +1,35 @@
+evaluator:
+  type: Dummy
+  dataset:
+    type: Dummy
+  model:
+    type: Dummy
+  transform:
+    entry_id: router
+    nodes:
+      router:
+        type: DummyRouter
+        args:
+          verbose: true
+        next: 
+          - tool1
+          - tool2
+          - tool3
+      tool1:
+        type: DummyTool#1
+        args:
+          verbose: true
+        next: 
+          - router
+      tool2:
+        type: DummyTool#2
+        args:
+          verbose: true
+        next: 
+          - router
+      tool3:
+        type: DummyTool#3
+        args:
+          verbose: true
+        next:
+          - router
