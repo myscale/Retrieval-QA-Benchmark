@@ -42,7 +42,11 @@ jobs:
 
       - name: Install dependencies
         shell: bash
-        run: poetry install --with dev
+        run: |
+          poetry install --with dev
+          
+          # update pytorch cpu for compatibility
+          poetry run pip install torch --index-url https://download.pytorch.org/whl/cpu --upgrade
 
       - name: Run core tests
         shell: bash
