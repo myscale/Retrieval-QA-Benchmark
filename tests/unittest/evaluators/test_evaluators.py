@@ -5,7 +5,7 @@ from os import path
 import pytest
 import yaml
 
-from retrieval_qa_benchmark.schema import QARecord
+from retrieval_qa_benchmark.schema import QAPrediction, QARecord
 from retrieval_qa_benchmark.utils.factory import EvaluatorFactory
 
 sys.path.insert(0, path.dirname(path.split(__file__)[0]))
@@ -13,7 +13,7 @@ from dummy import *  # noqa: F403, E402
 
 
 @pytest.mark.parametrize("num_base", [random.randint(20, 100) for _ in range(10)])
-def test_evaluator_1(num_base: int) -> None:
+def test_evaluator_graph(num_base: int) -> None:
     import math
     from os import path
 
@@ -46,3 +46,29 @@ def test_evaluator_1(num_base: int) -> None:
     score, res = evaluator()
 
     assert score == 100
+
+
+def test_evaluator_agent() -> None:
+    from os import path
+
+    config = yaml.safe_load(
+        open(
+            path.join(
+                path.dirname(path.realpath(__file__)),
+                "../assets/test_agent.yaml",
+            )
+        )
+    )
+    config["evaluator"]["dataset"]["args"] = {}
+    config["evaluator"]["dataset"]["args"]["lst"] = [
+        QARecord(
+            id=str(i), question=f"hello! record {i}", type="dummy", answer=f"record {i}"
+        )
+        for i in range(20)
+    ]
+
+    evaluator = EvaluatorFactory.from_config(config=config).build()
+    score, out = evaluator()
+    for o in out:
+        assert type(o) is QAPrediction
+        assert o.generated == "The answer is dummy."

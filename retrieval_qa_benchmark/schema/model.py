@@ -4,13 +4,7 @@ from typing import Any, Dict
 
 from pydantic import BaseModel
 
-from retrieval_qa_benchmark.schema.datatypes import QARecord
-
-
-class BaseLLMOutput(BaseModel):
-    generated: str
-    prompt_tokens: int
-    completion_tokens: int
+from retrieval_qa_benchmark.schema.datatypes import BaseLLMOutput, QARecord
 
 
 class BaseLLM(BaseModel):

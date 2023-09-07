@@ -114,13 +114,21 @@ class BaseTransform(BaseModel):
         """
         return 1
 
+    def set_children(self, children: List[Optional[BaseTransform]]) -> None:
+        """Set children for this transform
+
+        :param children: the next nodes to execute
+        :type children: List[Optional[BaseTransform]]
+        """
+        self.children = children
+
     def __call__(
         self, data: Dict[str, Any]
-    ) -> Tuple[Optional[BaseTransform], QARecord]:
+    ) -> Tuple[Optional[BaseTransform], Union[QARecord, QAPrediction]]:
         """you can call :class:`BaseTransform` as functions
 
-        :return: a transformed :class:`QARecord`
-        :rtype: Tuple[Optional["BaseTransform"], QARecord]
+        :return: a transformed :class:`QARecord` or :class:`QAPrediction`
+        :rtype: Tuple[Optional["BaseTransform"], Union[QARecord, QAPrediction]]
         """
         next_, data = self.chain(data)
         return next_, QARecord(**{k: v for k, v in data.items() if v is not None})
@@ -161,13 +169,22 @@ class TransformGraph(BaseModel):
         return cls(nodes=nodes, entry_id=entry_id)
 
     @PROFILER.profile_function("transform.TransformChain.profile")
-    def __call__(self, data: Dict[str, Any]) -> QARecord:
+    def __call__(
+        self, data: Union[Dict[str, Any], QARecord]
+    ) -> Union[QARecord, QAPrediction]:
+        """Execution of the defined graph
+
+        :param data: input :class:`QARecord` or Dict[str, Any]
+        :type data: Union[Dict[str, Any], QARecord]
+        :return: :class:`QARecord` or :class:`QAPrediction`
+        :rtype: Union[QARecord, QAPrediction]
+        """
         if len(self.nodes) > 0:
             ret: Optional["BaseTransform"] = self.nodes[self.entry_id]
             while ret is not None:
+                if type(data) is QARecord:
+                    data = data.model_dump()
                 ret, data = ret(data)  # type: ignore
-                if type(data) is QAPrediction:
-                    data["stack"].append(data)
         if isinstance(data, QARecord):
             return data
         else:

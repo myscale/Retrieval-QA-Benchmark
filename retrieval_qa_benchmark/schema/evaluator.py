@@ -33,36 +33,58 @@ class BaseEvaluator(BaseModel):
         extra = Extra.forbid
 
     def __call__(self) -> Tuple[float, List[QAPrediction]]:
+        """Main evaluator pipeline
+
+        If the transform returns :class:`QAPrediction`
+        then LLM will not be called to generate answers.
+
+        :raises e: _description_
+        :return: _description_
+        :rtype: Tuple[float, List[QAPrediction]]
+        """
         PROFILER.clear()
         result: List[QAPrediction] = []
         for d in tqdm(self.dataset.eval_set, desc="Evaluating"):
             try:
                 d_ = self.transform(d)
-                pred = self.llm(d_)
-                mtch = self.matcher(pred.generated, d_)
-                prompt_tokens = pred.prompt_tokens
-                completion_tokens = pred.completion_tokens
-                if d_.stack and len(d_.stack) > 0:
-                    prompt_tokens += sum([p.prompt_tokens for p in d_.stack if p])
-                    completion_tokens += sum(
-                        [p.completion_tokens for p in d_.stack if p]
+                if type(d_) is QARecord:
+                    pred = self.llm(d_)
+                    prompt_tokens = pred.prompt_tokens
+                    completion_tokens = pred.completion_tokens
+                    if d_.stack and len(d_.stack) > 0:
+                        prompt_tokens += sum([p.prompt_tokens for p in d_.stack])
+                        completion_tokens += sum(
+                            [p.completion_tokens for p in d_.stack]
+                        )
+                    mtch = self.matcher(pred.generated, d_)
+                    profile_avg = {
+                        k: PROFILER.accumulator[k] / PROFILER.counter[k]
+                        for k in PROFILER.accumulator.keys()
+                    }
+                    result.append(
+                        QAPrediction(
+                            **d.model_dump(),
+                            generated=pred.generated,
+                            matched=mtch,
+                            prompt_tokens=prompt_tokens,
+                            completion_tokens=completion_tokens,
+                            profile_avg=profile_avg,
+                            profile_count=PROFILER.counter,
+                            profile_time=PROFILER.accumulator,
+                        )
                     )
-                profile_avg = {
-                    k: PROFILER.accumulator[k] / PROFILER.counter[k]
-                    for k in PROFILER.accumulator.keys()
-                }
-                result.append(
-                    QAPrediction(
-                        **d_.model_dump(),
-                        pred=pred.generated,
-                        matched=mtch,
-                        prompt_tokens=prompt_tokens,
-                        completion_tokens=completion_tokens,
-                        profile_avg=profile_avg,
-                        profile_count=PROFILER.counter,
-                        profile_time=PROFILER.accumulator,
-                    )
-                )
+                elif type(d_) is QAPrediction:
+                    pred = d_  # type: ignore
+                    pred.matched = self.matcher(pred.generated, d_)
+                    pred.profile_count = PROFILER.counter
+                    pred.profile_time = PROFILER.accumulator
+                    pred.profile_avg = {
+                        k: PROFILER.accumulator[k] / PROFILER.counter[k]
+                        for k in PROFILER.accumulator.keys()
+                    }
+                    result.append(pred)  # type: ignore
+                else:
+                    raise TypeError(f"Unknown returned type `{type(d_)}`")
                 PROFILER.clear()
             except Exception as e:
                 logger.error(f"Failed to evaluate record {str(d)}")

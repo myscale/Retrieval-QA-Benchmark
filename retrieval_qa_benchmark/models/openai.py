@@ -4,6 +4,7 @@ import os
 from typing import Any, Dict, Optional
 
 import openai
+from loguru import logger
 
 from retrieval_qa_benchmark.schema import BaseLLM, BaseLLMOutput
 from retrieval_qa_benchmark.utils.registry import REGISTRY
@@ -51,7 +52,7 @@ class RemoteLLM(BaseLLM):
                     completion_tokens=completion.usage.completion_tokens,
                 )
             except openai.error.ServiceUnavailableError as e:
-                print("ServiceUnavailableError", e)
+                logger.error("ServiceUnavailableError", e)
                 continue
 
 
@@ -99,5 +100,5 @@ class ChatGPT(GPT):
                     completion_tokens=completion.usage.completion_tokens,
                 )
             except openai.error.ServiceUnavailableError as e:
-                print("ServiceUnavailableError", e)
+                logger.error("ServiceUnavailableError", e)
                 continue

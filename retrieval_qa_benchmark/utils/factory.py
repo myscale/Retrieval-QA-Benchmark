@@ -60,34 +60,37 @@ class TransformFactory(BaseFactory):
         return REGISTRY.Transforms[self.type](**self.args)
 
 
-class TransformGraphFactory(BaseModel):
-    nodes_config: Dict[str, Any] = {}
+class TransformGraphFactory(BaseFactory):
+    """"""
 
-    def build(self) -> TransformGraph:
-        if "nodes" in self.nodes_config and len(self.nodes_config["nodes"]) > 0:
-            nodes_config = self.nodes_config["nodes"]
-            if type(nodes_config) in [list, tuple]:
+    @classmethod
+    def from_config(cls, config: Dict[str, Any], **kwargs: Any) -> BaseFactory:
+        if "nodes" in config and len(config["nodes"]) > 0:
+            node_config = config["nodes"]
+            if type(node_config) in [list, tuple]:
                 entry_id = "0"
-                transforms = {
+                transforms: Dict[str, BaseTransform] = {
                     str(i): TransformFactory.from_config(c, id=str(i)).build()
-                    for i, c in enumerate(nodes_config)
+                    for i, c in enumerate(node_config)
                 }
-                for i in range(len(nodes_config)):
+                for i in range(len(node_config)):
                     if i > 0:
-                        transforms[str(i - 1)].children = [
-                            transforms[str(i)],
-                            transforms[str(i)],
-                        ]
+                        transforms[str(i - 1)].set_children(
+                            [
+                                transforms[str(i)],
+                                transforms[str(i)],
+                            ]
+                        )
             else:
-                entry_id = self.nodes_config["entry_id"]
-                transforms = {
+                entry_id = config["entry_id"]
+                transforms = {  # type: ignore
                     k: TransformFactory.from_config(c, id=k).build()
-                    for k, c in nodes_config.items()
+                    for k, c in node_config.items()
                 }
-                for k, c in nodes_config.items():
-                    transforms[k].children = [
-                        transforms[i] if i is not None else None for i in c["next"]
-                    ]
+                for k, c in node_config.items():
+                    transforms[k].set_children(
+                        [transforms[i] if i is not None else None for i in c["next"]]
+                    )
             assert (
                 entry_id != ""
             ), "Entry ID must not be empty for dictionary of transforms"
@@ -97,7 +100,13 @@ class TransformGraphFactory(BaseModel):
         else:
             entry_id = ""
             transforms = {}
-        return TransformGraph(entry_id=entry_id, nodes=transforms)
+        return cls(
+            type="TransformGraph", args={"entry_id": entry_id, "nodes": transforms}
+        )
+
+    def build(self) -> TransformGraph:
+        assert self.args
+        return TransformGraph(**self.args)
 
 
 class ModelFactory(BaseFactory):
@@ -126,11 +135,11 @@ class EvaluatorFactory(BaseFactory):
         else:
             dataset = DatasetFactory.from_config(self.config["dataset"]).build()
         if "transform" in self.config:
-            transform = TransformGraphFactory(
-                nodes_config=self.config["transform"]
+            transform = TransformGraphFactory.from_config(
+                config=self.config["transform"]
             ).build()
         else:
-            transform = TransformGraphFactory(nodes_config={}).build()
+            transform = TransformGraphFactory.from_config(config={}).build()
         model = ModelFactory.from_config(self.config["model"]).build()
         out_file = self.config["out_file"] if "out_file" in self.config else None
         return REGISTRY.Evaluators[self.type](
