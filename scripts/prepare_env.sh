@@ -8,7 +8,7 @@ tar -zxvf RQA.tar.gz
 cd RQA
 # wget https://mqdb-release-1253802058.cos.ap-beijing.myqcloud.com/RQA/results-tgi.zip
 wget https://myscale-datasets.s3.ap-southeast-1.amazonaws.com/RQA/results-tgi.zip
-unzip results-tgi.zip
+# unzip results-tgi.zip
 python3 -m pip install -e .
 
 # you can run scripts below:

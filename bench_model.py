@@ -25,7 +25,7 @@ def load_jsonl(fn):
     with open(fn) as f:
         return [json.loads(s) for s in f.readlines()[2:]]
 
-def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float, need_write: bool, model_name: str, context: int, max_new_token:int, thread:int, results_file_name:str):
+def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float, need_write: bool, model_name: str, context: int, max_new_token:int, thread:int, results_detail_file_name:str, results_overview_file_name:str):
     # 本次统计的时间间隔
     duration = time.time() - pre_time
     records_size = len([record for record in records if record["time"]>=pre_time])
@@ -75,16 +75,38 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
         "details": records
     }
 
+    overview = {
+        "model_name": model_name,
+        "context": context,
+        "max_new_token": max_new_token,
+        "thread": thread,
+        "QA_QPS": round(qa_throughput,2),
+        "QA_Latency": round(qa_latency,2),
+        "Prompt_QPS": round(prompt_throughput,2),
+        "Prompt_AVG": round(avg_prompt_tokens,2),
+        "Completion_QPS": round(completion_throughput,2),
+        "Completion_AVG": round(avg_completion_tokens,2),
+        "Completion_Latency": round(completion_latency,2)
+    }
+
     if need_write:
         # 读取已有的JSON数据
         data = {}
-        if os.path.exists(results_file_name):
-            with open(results_file_name, 'r') as f:
+        overviews = []
+        if os.path.exists(results_detail_file_name):
+            with open(results_detail_file_name, 'r') as f:
                 try:
                     data = json.load(f)
                 except json.JSONDecodeError:
                     # 文件为空或包含无效的 JSON，所以保持 data 为 {}
                     data = {}
+        if os.path.exists(results_overview_file_name):
+            with open(results_overview_file_name, 'r') as f:
+                try:
+                    overviews = json.load(f)
+                except json.JSONDecodeError:
+                    # 文件为空或包含无效的 JSON，所以初始化为空数组
+                    overviews = []
 
         # 更新JSON数据的层级结构
         # print(data)
@@ -95,10 +117,20 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
         if str(max_new_token) not in list(data[model_name][str(context)].keys()):
             data[model_name][str(context)][str(max_new_token)] = {}
         data[model_name][str(context)][str(max_new_token)][str(thread)] = stats
+        overviews.append(overview)
 
         # 写回JSON文件
-        with open(results_file_name, 'w') as f:
+        with open(results_detail_file_name, 'w') as f:
             json.dump(data, f, indent=2)
+        with open(results_overview_file_name, 'w') as f:
+            f.write('[\n')
+            for index, item in enumerate(overviews):
+                f.write(json.dumps(item, indent=None))
+                # 只有当它不是最后一个项目时，才添加逗号
+                if index != len(overviews) - 1:
+                    f.write(',')
+                f.write('\n')
+            f.write(']\n')
 
 
 # 定义调用 model 的函数
@@ -118,7 +150,8 @@ def bench_rag(*,
               config_file:'c'="model.yaml",
               models:'m'="default",
               report_interval:'i'=30,
-              results_file_name:'r'="bench_results.json",
+              results_detail_file_name:'r1'="bench_results_detail.json",
+              results_overview_file_name:'r2'="bench_results_overview.json",
               time_out:'t'=120,  # 单个试验运行最长耗时 / s
             ):
     logging.info(f"Run RAG performance benchmark with config_file={config_file}, models={models}, contexts={contexts}")
@@ -128,7 +161,9 @@ def bench_rag(*,
         config = load(f)
     
     # 清空历史结果
-    with open(results_file_name, 'w') as f:
+    with open(results_detail_file_name, 'w') as f:
+        pass
+    with open(results_overview_file_name, 'w') as f:
         pass
 
     # 预处理用户输入的参数
@@ -195,7 +230,7 @@ def bench_rag(*,
                                         # 间隔 report_interval 输出报告信息
                                         if report_interval > 0 and current_time - pre_time > report_interval:
                                             sys.stdout.write("\r\033[K")
-                                            report_stats(res, profile_name, pre_time, False, model_name, context, max_new_token, thread, results_file_name)
+                                            report_stats(res, profile_name, pre_time, False, model_name, context, max_new_token, thread, results_detail_file_name, results_overview_file_name)
                                             pre_time = current_time
                                         
                                 finally:
@@ -206,7 +241,7 @@ def bench_rag(*,
                         result_records = process_records(pre_time=bench_start_time, time_out=time_out)
                         
                         # 写入结果到文件
-                        report_stats(result_records, profile_name, bench_start_time, True, model_name, context, max_new_token, thread, results_file_name)
+                        report_stats(result_records, profile_name, bench_start_time, True, model_name, context, max_new_token, thread, results_detail_file_name, results_overview_file_name)
                     except Exception as e:
                         logging.error(f"Exception occur: {e}")
                         # raise e
