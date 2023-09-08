@@ -3,7 +3,7 @@ import time
 import sys
 import os
 import types
-from typing import List
+from typing import List, Union
 import logging.config
 from glob import glob
 from clize import run
@@ -14,6 +14,7 @@ from threading import Timer
 from retrieval_qa_benchmark.schema import QARecord, QAPrediction
 from retrieval_qa_benchmark.utils.profiler import PROFILER
 from functools import partial
+from transformers import AutoTokenizer
 
 from retrieval_qa_benchmark.models import *
 from retrieval_qa_benchmark.schema import *
@@ -34,6 +35,8 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
     prompt_tokens = [record["prompt_tokens"] for record in records if record["time"]>=pre_time]
     # 输出的总 token 数量
     completion_tokens = [record["completion_tokens"] for record in records if record["time"]>=pre_time]
+    # 所有 QA boot 总耗时 / s
+    total_boot_time = sum(record["profile_time"]['boot_time'] for record in records if record["time"]>=pre_time) / 1000
     # 所有 QA profile 总耗时 / s
     total_profile_time = sum(record["profile_time"][profile_name] for record in records if record["time"]>=pre_time) / 1000
     # 所有 QA profile 总平均耗时 / s
@@ -52,9 +55,9 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
     completion_throughput = sum(completion_tokens) / duration
 
     # QA 时延 / s
-    qa_latency = total_profile_time / records_size
+    qa_latency = (total_profile_time + total_boot_time) / records_size
     # QA 输出 token 时延 / ms
-    completion_latency = (total_profile_time / sum(completion_tokens)) * 1000
+    completion_latency = (total_profile_time / (sum(completion_tokens) - records_size)) * 1000
 
 
     logging.info("%s Throughput: %.1f req/s, Latency: %.1f s/req, %d prompt tokens/s (avg length %d), %d completion tokens/s (avg_length %d), completion latency %.3f ms",
@@ -134,12 +137,32 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
 
 
 # 定义调用 model 的函数
-def single(r:QARecord, model: BaseLLM, profile_name: str):
-    PROFILER.clear()
-    pred = model.generate(r).model_dump()
-    pred.update({'profile_time': PROFILER.accumulator})
-    pred.update({'profile_count': PROFILER.counter})
-    pred.update({'profile_avg': {profile_name: (PROFILER.accumulator[profile_name]/PROFILER.counter[profile_name])}})
+def single(in_: Union[QARecord, int], model: TGI_LLM, profile_name: str):
+    r, prompt_tokens = in_
+    # PROFILER.clear()
+    q = model.convert_record(r)
+    pred_str = ""
+    cnt = 0
+    t0 = time.time()
+    stream = model.client.text_generation(q, stream=True, details=True, **model.run_args)
+    for i, token in enumerate(stream):
+        if i == 0:
+            t_boot = time.time()
+        if not token.token.special:
+            pred_str += token.token.text
+        cnt += 1
+    t_gen = (time.time() - t_boot) * 1000
+    t_boot = (t_boot - t0) * 1000
+    pred = BaseLLMOutput(
+            generated=pred_str,
+            completion_tokens=cnt,
+            prompt_tokens=prompt_tokens,
+        ).model_dump()
+    accumulator = {'boot_time': t_boot, profile_name: t_gen}
+    
+    pred.update({'profile_time': accumulator})
+    pred.update({'profile_count': {k: 1 for k in accumulator}})
+    pred.update({'profile_avg': accumulator})
     return pred
 
 def bench_rag(*, 
@@ -184,13 +207,14 @@ def bench_rag(*,
                         model_type = model_config["type"]
                         profile_name = f"model.{model_type}.profile"
                         model_config["run_args"]["max_new_tokens"] = max_new_token
-                        model: BaseLLM = ModelFactory.from_config(model_config).build()
+                        model: TGI_LLM = ModelFactory.from_config(model_config).build()
                         
                         # 过滤相关的 records
                         jsonl_files =f"results-tgi/mmlu*-{context}.jsonl"
                         records = []
                         for f in glob(jsonl_files):
                             records.extend(load_jsonl(f))
+                        prompt_tokens = [r['prompt_tokens'] for r in records]
                         records = [QARecord(**{k: v for k, v in r.items() if k in QARecord.model_fields.keys()}) for r in records]
                         records = records[:max_records]
 
@@ -216,7 +240,7 @@ def bench_rag(*,
                                 timer.start()  # 开始计时
                                 partial_single = partial(single, model=model, profile_name=profile_name)
                                 try:
-                                    for pred in tqdm(p.imap_unordered(partial_single, records), total=len(records)):
+                                    for pred in tqdm(map(partial_single, zip(records, prompt_tokens)), total=len(records)):
                                         current_time = time.time()
                                         pred["time"] = current_time
                                         res.append(pred)
