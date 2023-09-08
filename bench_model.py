@@ -191,6 +191,11 @@ def bench_rag(*,
                             # 创建一个共享变量，作为终止标志
                             terminate_flag = multiprocessing.Value('i', 0)
                             with multiprocessing.Pool(thread) as p:  # 注意这里使用了multiprocessing.Pool
+                                try:
+                                    child_pids = [worker.pid for worker in p._pool]
+                                    logging.info(f"Current PID: {os.getpid()}, Child process PIDs:{child_pids}")
+                                except Exception as e:
+                                    pass
                                 # 进程池终止的逻辑
                                 def terminate_pool():
                                     with terminate_flag.get_lock():
