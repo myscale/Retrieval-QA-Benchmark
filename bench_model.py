@@ -25,32 +25,6 @@ def load_jsonl(fn):
     with open(fn) as f:
         return [json.loads(s) for s in f.readlines()[2:]]
 
-# 包装器, 确保进程超时终止
-def run_with_timeout(func, args=(), kwargs={}, timeout=120):
-    manager = multiprocessing.Manager()
-    result = manager.dict({
-        "output": None,
-        "error": None,
-        "timeout": False
-    })
-
-    def target():
-        try:
-            result["output"] = func(*args, **kwargs)
-        except Exception as e:
-            result["error"] = e
-
-    process = multiprocessing.Process(target=target)
-    process.start()
-    # process.join(timeout=timeout)
-    process.join()
-
-    if process.is_alive():
-        result["timeout"] = True
-        process.terminate()  # 终止进程
-        process.join()  # 确保进程已完全终止
-    return dict(result)
-
 def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float, need_write: bool, model_name: str, context: int, max_new_token:int, thread:int, results_file_name:str):
     # 本次统计的时间间隔
     duration = time.time() - pre_time
@@ -83,8 +57,8 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
     completion_latency = (total_profile_time / sum(completion_tokens)) * 1000
 
 
-    logging.info("%s pre_time: %.1f Throughput: %.1f req/s, Latency: %.1f s/req, %d prompt tokens/s (avg length %d), %d completion tokens/s (avg_length %d), completion latency %.3f ms",
-                 "Totally" if need_write else "", pre_time, qa_throughput, qa_latency, prompt_throughput, avg_prompt_tokens, completion_throughput, avg_completion_tokens, completion_latency)
+    logging.info("%s Throughput: %.1f req/s, Latency: %.1f s/req, %d prompt tokens/s (avg length %d), %d completion tokens/s (avg_length %d), completion latency %.3f ms",
+                 "Totally" if need_write else "", qa_throughput, qa_latency, prompt_throughput, avg_prompt_tokens, completion_throughput, avg_completion_tokens, completion_latency)
     
     stats = {
         "QA_Throughput": qa_throughput,
@@ -96,7 +70,9 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
         "Completion_tokens_per_second": completion_throughput,
         "Avg_completion_tokens": avg_completion_tokens,
         
-        "Completion_token_latency": completion_latency
+        "Completion_token_latency": completion_latency,
+
+        "details": records
     }
 
     if need_write:
