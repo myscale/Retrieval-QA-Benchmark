@@ -58,14 +58,17 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
     qa_latency = (total_profile_time + total_boot_time) / records_size
     # QA 输出 token 时延 / ms
     completion_latency = (total_profile_time / (sum(completion_tokens) - records_size)) * 1000
+    # QA 每次 boot 平均时延 / ms
+    qa_boot_latency = (total_boot_time / records_size) * 1000
 
 
-    logging.info("%s Throughput: %.1f req/s, Latency: %.1f s/req, %d prompt tokens/s (avg length %d), %d completion tokens/s (avg_length %d), completion latency %.3f ms",
-                 "Totally" if need_write else "", qa_throughput, qa_latency, prompt_throughput, avg_prompt_tokens, completion_throughput, avg_completion_tokens, completion_latency)
+    logging.info("%s Throughput: %.1f req/s, Latency: %.1f s/req, %d prompt tokens/s (avg length %d), %d completion tokens/s (avg_length %d), completion latency %.3f ms, boot latency %.3f s",
+                 "Totally" if need_write else "", qa_throughput, qa_latency, prompt_throughput, avg_prompt_tokens, completion_throughput, avg_completion_tokens, completion_latency, qa_boot_latency)
     
     stats = {
         "QA_Throughput": qa_throughput,
         "QA_Latency": qa_latency,
+        "QA_BootLatency": qa_boot_latency,
 
         "Prompt_tokens_per_second": prompt_throughput,
         "Avg_prompt_tokens": avg_prompt_tokens,
@@ -75,7 +78,7 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
         
         "Completion_token_latency": completion_latency,
 
-        "details": records
+        "details": [{k: v for k, v in record.items() if k != "generated"} for record in records]
     }
 
     overview = {
@@ -85,11 +88,12 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
         "thread": thread,
         "QA_QPS": round(qa_throughput,2),
         "QA_Latency": round(qa_latency,2),
+        "QA_BootLatency/ms": round(completion_latency,2),
         "Prompt_QPS": round(prompt_throughput,2),
         "Prompt_AVG": round(avg_prompt_tokens,2),
         "Completion_QPS": round(completion_throughput,2),
         "Completion_AVG": round(avg_completion_tokens,2),
-        "Completion_Latency": round(completion_latency,2)
+        "Completion_Latency/ms": round(completion_latency,2)
     }
 
     if need_write:
@@ -240,7 +244,8 @@ def bench_rag(*,
                                 timer.start()  # 开始计时
                                 partial_single = partial(single, model=model, profile_name=profile_name)
                                 try:
-                                    for pred in tqdm(map(partial_single, zip(records, prompt_tokens)), total=len(records)):
+                                    for pred in tqdm(p.imap_unordered(partial_single, zip(records, prompt_tokens)), total=len(records)):
+                                    # for pred in tqdm(map(partial_single, zip(records, prompt_tokens)), total=len(records)):
                                         current_time = time.time()
                                         pred["time"] = current_time
                                         res.append(pred)
