@@ -88,7 +88,7 @@ def report_stats(records: List[QAPrediction], profile_name:str,  pre_time: float
         "thread": thread,
         "QA_QPS": round(qa_throughput,2),
         "QA_Latency": round(qa_latency,2),
-        "QA_BootLatency/ms": round(completion_latency,2),
+        "QA_BootLatency/ms": round(qa_boot_latency,2),
         "Prompt_QPS": round(prompt_throughput,2),
         "Prompt_AVG": round(avg_prompt_tokens,2),
         "Completion_QPS": round(completion_throughput,2),
@@ -152,11 +152,12 @@ def single(in_: Union[QARecord, int], model: TGI_LLM, profile_name: str):
     for i, token in enumerate(stream):
         if i == 0:
             t_boot = time.time()
+            print(f"get init t_boot {t_boot} for {r.id}")
         if not token.token.special:
             pred_str += token.token.text
         cnt += 1
     t_gen = (time.time() - t_boot) * 1000
-    t_boot = (t_boot - t0) * 1000
+    t_boot = (t_boot - t0) * 1000 # ms
     pred = BaseLLMOutput(
             generated=pred_str,
             completion_tokens=cnt,
