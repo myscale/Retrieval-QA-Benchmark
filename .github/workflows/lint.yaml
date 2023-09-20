@@ -101,6 +101,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # update pytorch cpu for compatibility
+          poetry run pip install torch --index-url https://download.pytorch.org/whl/cpu --upgrade
+
           poetry install --with dev
 
       - name: Install editable

@@ -39,7 +39,7 @@ class TGI_LLM(BaseLLM):
             **kwargs,
         )
 
-    def _generate(self, text: str) -> BaseLLMOutput:
+    def generate(self, text: str) -> BaseLLMOutput:
         if self.stream:
             pred_str = ""
             cnt = 0
@@ -81,4 +81,3 @@ class TGI_LLM(BaseLLM):
                 generated=resp.generated_text,
                 completion_tokens=resp.details.generated_tokens,
                 prompt_tokens=len(resp.details.prefill),
-            )

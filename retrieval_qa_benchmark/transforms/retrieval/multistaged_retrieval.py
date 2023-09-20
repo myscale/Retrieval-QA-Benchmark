@@ -1,7 +1,7 @@
 from typing import Any
 
 from retrieval_qa_benchmark.transforms.base import BaseContextTransform
-from retrieval_qa_benchmark.transforms.search import RerankSearcher
+from retrieval_qa_benchmark.transforms.searchers import RerankSearcher
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 

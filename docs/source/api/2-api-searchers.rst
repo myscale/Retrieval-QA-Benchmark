@@ -5,6 +5,6 @@
   Searchers
 ##############################
 
-.. automodule:: retrieval_qa_benchmark.transforms.search
+.. automodule:: retrieval_qa_benchmark.transforms.searchers
 	:inherited-members: BaseSearcher
 	:members:
