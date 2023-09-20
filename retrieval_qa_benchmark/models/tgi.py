@@ -1,11 +1,12 @@
 import re
 import time
 from typing import Any, Dict, Optional
+
 from huggingface_hub import InferenceClient
 
 from retrieval_qa_benchmark.schema.model import BaseLLM, BaseLLMOutput
-from retrieval_qa_benchmark.utils.registry import REGISTRY
 from retrieval_qa_benchmark.utils.profiler import PROFILER
+from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
 @REGISTRY.register_model("tgi")
@@ -44,32 +45,36 @@ class TGI_LLM(BaseLLM):
             pred_str = ""
             cnt = 0
             for name in [self.boot_time_key, self.completion_time_key]:
-                if name not in self.counter:
+                if name not in PROFILER.counter:
                     PROFILER.counter[name] = 0
-                if name not in self.accumulator:
+                if name not in PROFILER.accumulator:
                     PROFILER.accumulator[name] = 0
             t0 = time.time()
+            t_boot = t0
             stream = self.client.text_generation(
                 "\n".join([self.system_prompt, text]),
-                stream=True, details=True, **self.run_args)
-            for i, token in enumerate(stream):
+                stream=True,
+                details=True,
+                **self.run_args,
+            )
+            for i, t in enumerate(stream):
                 if i == 0:
                     t_boot = time.time()
-                if not token.token.special:
-                    pred_str += token.token.text
+                if not t.token.special:
+                    pred_str += t.token.text
                 cnt += 1
             t_gen = (time.time() - t_boot) * 1000
-            t_boot = (t_boot - t0) * 1000 # ms
+            t_boot = (t_boot - t0) * 1000  # ms
             PROFILER.accumulator[self.boot_time_key] += t_boot
             PROFILER.accumulator[self.completion_time_key] += t_gen
             PROFILER.counter[self.boot_time_key] += 1
             PROFILER.counter[self.completion_time_key] += cnt - 1
             return BaseLLMOutput(
-                    generated=pred_str,
-                    completion_tokens=cnt,
-                    # This is NOT returned by TGI so we just count words.
-                    prompt_tokens=len(re.findall('\w+', pred_str)),
-                )
+                generated=pred_str,
+                completion_tokens=cnt,
+                # This is NOT returned by TGI so we just count words.
+                prompt_tokens=len(re.findall("\w+", pred_str)),
+            )
         else:
             resp = self.client.text_generation(
                 "\n".join([self.system_prompt, text]),
@@ -81,3 +86,4 @@ class TGI_LLM(BaseLLM):
                 generated=resp.generated_text,
                 completion_tokens=resp.details.generated_tokens,
                 prompt_tokens=len(resp.details.prefill),
+            )
