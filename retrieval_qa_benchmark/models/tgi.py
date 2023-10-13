@@ -1,6 +1,6 @@
 import re
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from huggingface_hub import InferenceClient
 
@@ -26,11 +26,12 @@ class TGI_LLM(BaseLLM):
         name: str = "llama2-13b-chat-hf",
         backend_url: str = "http://127.0.0.1:8080",
         system_prompt: Optional[str] = None,
+        hf_token: Union[str, bool, None] = None,
         run_args: Optional[Dict[str, Any]] = None,
         stream: bool = False,
         **kwargs: Any,
     ) -> "TGI_LLM":
-        client = InferenceClient(model=backend_url)
+        client = InferenceClient(model=backend_url, token=hf_token)
         return cls(
             name=name,
             client=client,
