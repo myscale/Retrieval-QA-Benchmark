@@ -8,18 +8,17 @@ from retrieval_qa_benchmark.schema import BaseDataset, BaseTransform
 from retrieval_qa_benchmark.utils.registry import REGISTRY
 
 
-class MMLUTransform(BaseTransform):
+class ARCTransform(BaseTransform):
     qkey: str = "question"
     ckey: str = "choices"
-    akey: str = "answer"
+    akey: str = "answerKey"
 
     def transform_id(self, data: Dict[str, Any], **params: Any) -> str:
-        return sha256(
-            (data[self.qkey] + "".join(data[self.ckey])).encode("utf-8")
-        ).hexdigest()
+        return data["id"]
 
     def transform_answer(self, data: Dict[str, Any], **params: Any) -> str:
-        return data[self.ckey][data[self.akey]]
+        d = {ck: ct for ck, ct, in zip(data["choices"]["label"], data["choices"]["text"])}
+        return d[data[self.akey]]
 
     def transform_question(self, data: Dict[str, Any], **params: Any) -> str:
         question = data[self.qkey]
@@ -31,23 +30,23 @@ class MMLUTransform(BaseTransform):
     def transform_choices(
         self, data: Dict[str, Any], **params: Any
     ) -> Optional[List[str]]:
-        return data["choices"]
+        return data[self.ckey]["text"]
 
 
-@REGISTRY.register_dataset("mmlu")
-class MMLU(BaseDataset):
-    """https://huggingface.co/datasets/mmlu
-    MMLU Dataset from Huggingface
+@REGISTRY.register_dataset("arc")
+class ARC(BaseDataset):
+    """https://huggingface.co/datasets/ai2_arc
+    ARC Dataset from Huggingface
     """
 
     @classmethod
     def build(
         cls,
-        subset: str = "prehistory",
-    ) -> MMLU:
-        transform = MMLUTransform()
+        subset: str = "ARC-Easy",
+    ) -> ARC:
+        transform = ARCTransform()
         name, eval_set = build_hfdataset_internal(
-            name=["cais/mmlu", subset],
+            name=["ai2_arc", subset],
             eval_split="test",
             transform=transform,
         )

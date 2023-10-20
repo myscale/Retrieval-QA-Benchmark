@@ -1,0 +1,3 @@
+type: "truthful_qa"
+args:
+  subset: "mc2_targets"

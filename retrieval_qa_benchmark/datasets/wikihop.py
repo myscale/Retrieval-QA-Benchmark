@@ -30,8 +30,8 @@ class WikiHopTransform(BaseTransform):
 
 @REGISTRY.register_dataset("wikihop")
 class WikiHop(BaseDataset):
-    """https://huggingface.co/datasets/hotpot_qa
-    Hotpot QA Dataset from Huggingface
+    """https://huggingface.co/datasets/wikihop
+    WikiHop Dataset from Huggingface
     """
 
     @classmethod
