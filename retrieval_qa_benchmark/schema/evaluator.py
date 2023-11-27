@@ -63,7 +63,7 @@ class BaseEvaluator(BaseModel):
                     }
                     result.append(
                         QAPrediction(
-                            **d.model_dump(),
+                            **d_.model_dump(),
                             generated=pred.generated,
                             matched=mtch,
                             prompt_tokens=prompt_tokens,

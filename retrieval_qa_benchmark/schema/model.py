@@ -15,8 +15,10 @@ class BaseLLM(BaseModel):
         "{context}Question: {question}\n{choices}Answer: "
     )
     """template to convert :class:`QARecord` into string"""
-    context_template: str = "Context:\n{context}\n\n"
+    context_prompt: str = "Context:\n{context}\n\n"
     """template to inject contexts"""
+    context_template: str = "[{id}] {paragraph}"
+    """template for each contect appended"""
     run_args: Dict[str, Any] = {}
     """Runtime keyword arguments"""
 
@@ -44,8 +46,8 @@ class BaseLLM(BaseModel):
         context, context_str = [], ""
         if data.context:
             for i in range(len(data.context)):
-                context.append(f"[{i + 1}] {data.context[i]}")
-            context_str = self.context_template.format(context="\n".join(context))
+                context.append(self.context_template.format(id=i+1, context=data.context[i]))
+            context_str = self.context_prompt.format(context="\n".join(context))
         return self.record_template.format(
             question=data.question, choices=choices, context=context_str
         )

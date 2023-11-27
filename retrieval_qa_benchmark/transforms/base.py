@@ -17,7 +17,7 @@ class BaseLLMTransform(BaseTransform):
 class BaseContextTransform(BaseTransform):
     sep_chr: str = "\n"
     num_selected: int = 5
-    context_template: str = "{title} | {paragraph}"
+    retrieval_template: str = "{title} | {paragraph}"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)

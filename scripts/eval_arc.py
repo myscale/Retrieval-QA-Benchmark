@@ -13,31 +13,31 @@ from retrieval_qa_benchmark.utils.registry import REGISTRY
 from retrieval_qa_benchmark.utils.factory import EvaluatorFactory
 
 p = ArgumentParser()
-p.add_argument("--config", "-c", default="../config/mmlu.yaml")
+p.add_argument("--config", "-c", default="../config/arc.yaml")
 p.add_argument("--outdir", "-o", default="results")
 p.add_argument("--num_retrieval", "-k", default=5, type=int)
-p.add_argument("--mmlu-subset", "-s", default="prehistory", type=str)
+p.add_argument("--arc-subset", "-s", default="ARC-Easy", type=str)
 
 args = p.parse_args()
 yaml_file = args.config
 config = load(open(yaml_file))
 
 assert (
-    config["evaluator"]["dataset"]["type"] == "mmlu"
-), "This script is only for evaluating mmlu datasets!"
+    config["evaluator"]["dataset"]["type"] == "arc"
+), "This script is only for evaluating ARC datasets!"
 try:
     if "args" not in config["evaluator"]["dataset"]:
         config["evaluator"]["dataset"]["args"] = {}
-    config["evaluator"]["dataset"]["args"]["subset"] = args.mmlu_subset
+    config["evaluator"]["dataset"]["args"]["subset"] = args.arc_subset
 except Exception as e:
     logger.warning(
-        f"{type(e)}: {str(e)} -- Cannot change MMLU subset for this evaluation."
+        f"{type(e)}: {str(e)} -- Cannot change ARC subset for this evaluation."
     )
 
 k = args.num_retrieval
 
 outfile_result = path.join(
-    args.outdir, path.split(args.config)[1] + f"@{args.mmlu_subset}-{k}.jsonl"
+    args.outdir, path.split(args.config)[1] + f"@{args.arc_subset}-{k}.jsonl"
 )
 print("output_file:", outfile_result)
 
@@ -52,7 +52,6 @@ while flag:
     try:
         evaluator: BaseEvaluator = EvaluatorFactory.from_config(config).build()
         # evaluator.dataset.eval_set = evaluator.dataset.eval_set[:5]
-        print(evaluator.transform.nodes)
         if len(evaluator.transform.nodes) > 0:
             try:
                 evaluator.transform.nodes["0"].num_selected = k
@@ -62,7 +61,6 @@ while flag:
         flag = False
     except Exception as e:
         logger.error(f"{str(e)}: failed to build / run evaluator! Retrying...")
-        raise e
 
 
 

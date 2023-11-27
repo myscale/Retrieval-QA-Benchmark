@@ -28,7 +28,7 @@ class ContextWithFaiss(BaseContextTransform):
         self._searcher = FaissSearcher(
             embedding_name=self.embedding_name,
             index_path=self.index_path,
-            template=self.context_template,
+            template=self.retrieval_template,
             nprobe=self.nprobe,
             dataset_name=self.dataset_name,
             dataset_split="train",
@@ -44,7 +44,7 @@ class ContextWithElasticBM25(BaseContextTransform):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._searcher = ElSearchSearcher(
-            template=self.context_template,
+            template=self.retrieval_template,
             el_host=self.el_host,
             el_auth=self.el_auth,
             dataset_name=self.dataset_name,
@@ -67,7 +67,7 @@ class ContextWithMyScale(BaseContextTransform):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._searcher = MyScaleSearcher(
-            template=self.context_template,
+            template=self.retrieval_template,
             embedding_name=self.embedding_name,
             host=self.msc_host,
             port=self.msc_port,

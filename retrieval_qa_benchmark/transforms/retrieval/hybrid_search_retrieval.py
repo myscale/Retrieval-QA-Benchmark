@@ -30,7 +30,7 @@ class ContextWithFaissESHybrid(BaseContextTransform):
         self._searcher = FaissElSearchBM25HybridSearcher(
             embedding_name=self.embedding_name,
             index_path=self.index_path,
-            template=self.context_template,
+            template=self.retrieval_template,
             el_host=self.el_host,
             el_auth=self.el_auth,
             num_filtered=self.num_filtered,
