@@ -294,7 +294,7 @@ class RerankSearcher(BaseSearcher):
         rrf_db["score_rrf"] = score_rrf
         return rrf_db
 
-    def rrf(self, rank_list: list[int], k_list: List[int]) -> Optional[float]:
+    def rrf(self, rank_list: List[int], k_list: List[int]) -> Optional[float]:
         score_rrf = None
         for rank, k in zip(rank_list, k_list):
             if score_rrf is None:
