@@ -53,15 +53,15 @@ with open("some-file-name-to-store-result.jsonl", "w") as f:
 
 1. RAG with FAISS
 
-- Download the index for wikipedia (around 26G). (index is still uploading)
+- Download the index file for wikipedia [here](https://myscale-datasets.s3.ap-southeast-1.amazonaws.com/RQA/IVFSQ_IP.index) (around 26G).
 - Download dataset from huggingface with our code (around 140G). It will automatically download the dataset for the first time.
 - Set the index path to the download index. 
 
 
 2. RAG with MyScale
 
-- Download the data for wikipedia in parquet. (data is still uploading)
-- Insert the data and create vector index
+- Download the data for wikipedia in parquet [here](https://myscale-datasets.s3.ap-southeast-1.amazonaws.com/wiki_abstract_with_vector.parquet).
+- Insert the data and create vector index. You can also directly use our free pod hosting the Wikipedia data as described [here](https://github.com/myscale/ChatData?tab=readme-ov-file#data-schema).
 
 
 ## Result with Simple RAG pipeline
